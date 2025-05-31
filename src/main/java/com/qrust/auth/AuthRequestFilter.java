@@ -6,8 +6,11 @@ import jakarta.ws.rs.Priorities;
 import jakarta.ws.rs.container.ContainerRequestContext;
 import jakarta.ws.rs.container.ContainerRequestFilter;
 import jakarta.ws.rs.ext.Provider;
+import lombok.extern.slf4j.Slf4j;
+
 import java.io.IOException;
 
+@Slf4j
 @Provider
 @Priority(Priorities.AUTHENTICATION)
 public class AuthRequestFilter implements ContainerRequestFilter {
@@ -18,7 +21,8 @@ public class AuthRequestFilter implements ContainerRequestFilter {
     public void filter(ContainerRequestContext requestContext) throws IOException {
         String path = requestContext.getUriInfo().getPath();
         // Allow public QR info endpoint
-        if (path.startsWith("qr/") || path.startsWith("qr")) {
+        log.info("Request path: {}", path);
+        if (path.startsWith("/qr") || path.startsWith("/details")) {
             return;
         }
         if (!authService.isAuthEnabled()) {

@@ -8,6 +8,9 @@ import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbParti
 
 import java.time.LocalDateTime;
 import java.util.UUID;
+import java.util.Map;
+
+
 
 @DynamoDbBean
 @Data
@@ -19,6 +22,8 @@ public class QRCode {
     private QRStatus status;
     private PlanType planType;
     private LocalDateTime createdAt;
+    private QRType type;
+    private Map<String, String> details;
 
     @DynamoDbPartitionKey
     public UUID getId() {

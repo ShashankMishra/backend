@@ -14,14 +14,15 @@ dependencies {
     implementation 'io.quarkiverse.amazonservices:quarkus-amazon-dynamodb-enhanced'
     implementation 'io.quarkus:quarkus-rest'
     implementation 'io.quarkus:quarkus-rest-jackson'
-    //implementation 'io.quarkiverse.amazonservices:quarkus-amazon-cognito-user-pools'
     implementation 'io.quarkus:quarkus-arc'
-    //implementation 'io.quarkus:quarkus-oidc'
+    implementation 'io.quarkus:quarkus-oidc'
+    implementation 'io.quarkus:quarkus-oidc-client'
     implementation 'io.quarkus:quarkus-smallrye-jwt'
     implementation 'io.quarkus:quarkus-logging-json'
     implementation 'io.quarkus:quarkus-opentelemetry'
     implementation 'org.projectlombok:lombok:1.18.32'
     implementation 'software.amazon.awssdk:url-connection-client'
+    // implementation 'io.quarkiverse.amazonservices:quarkus-amazon-cognito-user-pools'
     annotationProcessor 'org.projectlombok:lombok:1.18.32'
 
     testImplementation 'io.quarkus:quarkus-junit5'
@@ -55,9 +56,15 @@ compileTestJava {
     options.encoding = 'UTF-8'
 }
 
-task createDynamoDbTables(type: Exec) {
+tasks.register('createDynamoDbTables', Exec) {
     group = 'local setup'
     description = 'Create DynamoDB tables in local DynamoDB (LocalStack) using AWS CLI.'
     commandLine 'bash', 'create-dynamodb-tables.sh'
 }
 
+tasks.register('deleteDynamoDbTables', Exec) {
+    description = 'Deletes all DynamoDB tables defined in delete-dynamodb-tables.sh'
+    group = 'DynamoDB'
+    workingDir = projectDir
+    commandLine 'bash', 'delete-dynamodb-tables.sh'
+}
