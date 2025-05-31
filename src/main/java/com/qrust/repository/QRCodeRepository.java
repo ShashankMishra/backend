@@ -1,0 +1,15 @@
+package com.qrust.repository;
+
+import com.qrust.domain.QRCode;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
+
+public interface QRCodeRepository {
+    void save(QRCode qrCode);
+    Optional<QRCode> findById(UUID id);
+    Optional<QRCode> findByPublicToken(String publicToken);
+    List<QRCode> findAll();
+    void delete(UUID id);
+}
+

@@ -1,0 +1,40 @@
+version: '3.8'
+services:
+  dynamodb:
+    image: amazon/dynamodb-local:latest
+    container_name: dynamodb-local
+    ports:
+      - "8000:8000"
+    command: -jar DynamoDBLocal.jar -inMemory -sharedDb
+
+  jaeger:
+    image: jaegertracing/all-in-one:1.56
+    container_name: jaeger
+    ports:
+      - "16686:16686" # Jaeger UI
+      - "4317:4317"   # OTLP gRPC
+      - "6831:6831/udp" # Jaeger agent
+      - "14268:14268" # Jaeger collector
+
+  localstack:
+    image: localstack/localstack:3.4
+    container_name: localstack
+    environment:
+      - SERVICES=cognito
+      - DEBUG=1
+    ports:
+      - "4566:4566"
+      - "4510-4559:4510-4559"
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock"
+
+# Optionally, add a block for your Quarkus app if you want to run it in Docker as well.
+# app:
+#   build: .
+#   ports:
+#     - "8080:8080"
+#   depends_on:
+#     - dynamodb
+#     - jaeger
+#     - localstack
+
