@@ -1,0 +1,56 @@
+name: Deploy to Production
+
+on:
+  push:
+    tags:
+      - '*'
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Pull image by SHA
+        run: |
+          IMAGE_NAME=ghcr.io/${{ github.repository }}
+          IMAGE_NAME_LOWER=$(echo "$IMAGE_NAME" | tr '[:upper:]' '[:lower:]')
+          docker pull $IMAGE_NAME_LOWER/backend:${GITHUB_SHA}
+
+      - name: Tag image with tag and env
+        run: |
+          IMAGE_NAME=ghcr.io/${{ github.repository }}
+          IMAGE_NAME_LOWER=$(echo "$IMAGE_NAME" | tr '[:upper:]' '[:lower:]')
+          docker tag $IMAGE_NAME_LOWER/backend:${GITHUB_SHA} $IMAGE_NAME_LOWER/backend:${GITHUB_REF_NAME}-prod
+
+      - name: Push tag and prod images
+        run: |
+          IMAGE_NAME=ghcr.io/${{ github.repository }}
+          IMAGE_NAME_LOWER=$(echo "$IMAGE_NAME" | tr '[:upper:]' '[:lower:]')
+          docker push $IMAGE_NAME_LOWER/backend:${GITHUB_REF_NAME}-prod
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Render ECS task definition with new image tag
+        run: |
+          IMAGE_NAME=ghcr.io/${{ github.repository }}/backend:${GITHUB_REF_NAME}-prod
+          jq '.containerDefinitions[0].image = env.IMAGE_NAME' ecs-task-def-base.json > ecs-task-def.json
+
+      - name: Deploy to Amazon ECS
+        uses: aws-actions/amazon-ecs-deploy-task-definition@v1
+        with:
+          task-definition: ecs-task-def.json
+          service: ${{ secrets.ECS_SERVICE_NAME }}
+          cluster: ${{ secrets.ECS_CLUSTER_NAME }}
+          wait-for-service-stability: true
+
