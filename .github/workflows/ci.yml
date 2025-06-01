@@ -1,6 +1,4 @@
-## A basic GitHub Actions workflow for your Quarkus application.
-
-name: CI build
+name: CI
 
 on:
   push:
@@ -11,18 +9,37 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    services:
+      docker:
+        image: docker:24.0.5-dind
+        options: --privileged
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
 
       - name: Set up JDK 21
         uses: actions/setup-java@v4
         with:
-          java-version: 21
-          distribution: temurin
-          cache: gradle
+          distribution: 'temurin'
+          java-version: '21'
 
-      - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v4
+      - name: Make setup script executable
+        run: chmod +x setup-ci.sh create-dynamodb-tables.sh
 
-      - name: Build
-        run: ./gradlew build
+      - name: Run setup script (docker-compose + DynamoDB tables)
+        run: ./setup-ci.sh
+
+      - name: Build and test with Gradle
+        run: ./gradlew build test
+
+      - name: Upload backend JAR artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: backend-jar
+          path: build/quarkus-app/quarkus-run.jar
+
+      - name: Upload Dockerfile artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: backend-dockerfile
+          path: Dockerfile
