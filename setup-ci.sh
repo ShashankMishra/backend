@@ -3,7 +3,7 @@
 set -e
 
 echo "[CI Setup] Starting Docker Compose..."
-docker-compose up -d
+docker compose up -d
 
 echo "[CI Setup] Waiting for DynamoDB Local to be ready..."
 # Wait for DynamoDB Local to be available (adjust port if needed)
