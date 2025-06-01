@@ -23,6 +23,11 @@ jobs:
           distribution: 'temurin'
           java-version: '21'
 
+      - name: Set dummy AWS credentials for DynamoDB Local
+        run: |
+          echo "AWS_ACCESS_KEY_ID=dummy" >> $GITHUB_ENV
+          echo "AWS_SECRET_ACCESS
+
       - name: Make setup script executable
         run: chmod +x setup-ci.sh create-dynamodb-tables.sh
 
