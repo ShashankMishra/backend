@@ -37,6 +37,13 @@ public class UserQRCodeLinkController {
     }
 
     @GET
+    @Path("/profile")
+    public Response profile() {
+        String userId = authService.getCurrentUserId();
+        return Response.ok(userId).build();
+    }
+
+    @GET
     public Response getLinkedQrCodes() {
         String userId = authService.getCurrentUserId();
         List<UserQRCodeLink> links = linkService.getLinkedQrCodes(userId);

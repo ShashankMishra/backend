@@ -23,6 +23,8 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     public String getCurrentUserId() {
+        System.out.println(" Get user " );
+        System.out.println(headers.getRequestHeader(HttpHeaders.AUTHORIZATION));
         if (!authEnabled) return "dev-user";
         return jwt.getClaim("sub");
     }
