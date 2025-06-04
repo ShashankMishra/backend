@@ -1,33 +1,30 @@
 package com.qrust.api.dto;
 
+import com.qrust.domain.PlanType;
+import com.qrust.domain.QRStatus;
+import com.qrust.domain.QRType;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.Valid;
 import lombok.Data;
+import java.util.UUID;
 
+import static com.qrust.domain.PlanType.FREE;
+import static com.qrust.domain.QRStatus.UNASSIGNED;
 
 @Data
 public class QRCodeRequest {
-    private QRType type;
-    private PersonDetails personDetails;
-    private VehicleDetails vehicleDetails;
-    private ChildDetails childDetails;
-    private LuggageDetails luggageDetails;
-    private PhoneDetails phoneDetails;
-    private String planType;
 
-    public boolean isDetailsValid() {
-        if (type == null) return false;
-        switch (type) {
-            case PERSON:
-                return personDetails != null;
-            case VEHICLE:
-                return vehicleDetails != null;
-            case CHILD:
-                return childDetails != null;
-            case LUGGAGE:
-                return luggageDetails != null;
-            case PHONE:
-                return phoneDetails != null;
-            default:
-                return false;
-        }
-    }
+    @NotNull
+    private QRType type;
+
+    @NotNull
+    private QRStatus status = UNASSIGNED;
+
+    @NotNull
+    private PlanType planType = FREE;
+
+    // Use DTO subtypes for details
+    @Valid
+    private QRDetailsDto details;
+
 }

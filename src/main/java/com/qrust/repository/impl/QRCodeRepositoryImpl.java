@@ -39,12 +39,6 @@ public class QRCodeRepositoryImpl implements QRCodeRepository {
         return Optional.ofNullable(table.getItem(r -> r.key(k -> k.partitionValue(id.toString()))));
     }
 
-    @WithSpan
-    public Optional<QRCode> findByPublicToken(String publicToken) {
-        log.debug("Finding QRCode by publicToken: {}", publicToken);
-        return Optional.ofNullable(table.getItem(r -> r.key(k -> k.partitionValue(publicToken))));
-    }
-
     @Override
     public List<QRCode> findAll() {
         log.info("Retrieving all QRCodes");

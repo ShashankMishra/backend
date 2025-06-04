@@ -8,7 +8,6 @@ import java.util.UUID;
 public interface QRCodeRepository {
     void save(QRCode qrCode);
     Optional<QRCode> findById(UUID id);
-    Optional<QRCode> findByPublicToken(String publicToken);
     List<QRCode> findAll();
     void delete(UUID id);
 }
