@@ -20,9 +20,9 @@ public class QRCode {
     private PlanType planType;
     private LocalDateTime createdAt;
     private QRType type;
-
-    private QRDetails details;
     private User owner;
+    private User createdBy;
+    private QRDetails details;
 
     @DynamoDbPartitionKey
     public UUID getId() {

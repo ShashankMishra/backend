@@ -2,8 +2,11 @@ package com.qrust.service;
 
 import com.qrust.api.dto.*;
 import com.qrust.domain.QRCode;
+import com.qrust.domain.QRStatus;
+import com.qrust.domain.User;
 import com.qrust.mapper.*;
 import com.qrust.repository.QRCodeRepository;
+import io.quarkus.security.UnauthorizedException;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 
@@ -15,6 +18,9 @@ import java.util.UUID;
 public class QRCodeServiceImpl implements QRCodeService {
     @Inject
     QRCodeRepository qrCodeRepository;
+
+    @Inject
+    UserService userService;
 
     // Mappers
     private final PersonDetailsMapper personDetailsMapper = new PersonDetailsMapper();
@@ -28,29 +34,48 @@ public class QRCodeServiceImpl implements QRCodeService {
         QRCode entity = toEntity(req);
         entity.setId(UUID.randomUUID());
         entity.setCreatedAt(LocalDateTime.now());
+        User currentUser = userService.getCurrentUser();
+        entity.setOwner(currentUser);
+        entity.setStatus(QRStatus.ASSIGNED);
+        entity.setCreatedBy(currentUser);
         qrCodeRepository.save(entity);
         return entity;
     }
 
     @Override
     public QRCode updateQr(UUID qrId, QRCodeRequest req) {
-        QRCode existing = qrCodeRepository.findById(qrId).orElse(null);
-        if (existing == null) return null;
+        // get qrcode from repo and then anyone can update QR if it is unassigned status otherwise only owner can update
+        User currentUser = userService.getCurrentUser();
+        QRCode qrCode = getQr(qrId);
+        if (qrCode == null) return null;
+        if (qrCode.getOwner() == null || !qrCode.getOwner().getUserId().equals(currentUser.getUserId())) {
+            throw new UnauthorizedException("You do not have permission to update this QR code.");
+        }
+        // If the QR code is assigned, only the owner can update it
         QRCode updated = toEntity(req);
-        updated.setId(qrId);
-        updated.setCreatedAt(existing.getCreatedAt());
+        qrCode.setDetails(updated.getDetails());
         qrCodeRepository.save(updated);
         return updated;
     }
 
     @Override
     public void deleteQr(UUID qrId) {
+        // delete qr id only if it is owned by the current user
+        QRCode existing = getQr(qrId);
+        if (existing == null) return;
+        User currentUser = userService.getCurrentUser();
+        if (existing.getOwner() == null || !existing.getOwner().getUserId().equals(currentUser.getUserId())) {
+            throw new UnauthorizedException("You do not have permission to delete this QR code.");
+        }
         qrCodeRepository.delete(qrId);
     }
 
     @Override
     public List<QRCode> getAllQrs() {
-        return qrCodeRepository.findAll();
+        User currentUser = userService.getCurrentUser();
+        return qrCodeRepository.findAll().stream()
+                .filter(qr -> qr.getOwner() != null && qr.getOwner().getUserId().equals(currentUser.getUserId()))
+                .toList();
     }
 
     @Override
@@ -71,6 +96,7 @@ public class QRCodeServiceImpl implements QRCodeService {
         resp.setDetails(entity.getDetails());
         return resp;
     }
+
     // Helper to map request DTO to entity
     private QRCode toEntity(QRCodeRequest req) {
         QRCode entity = new QRCode();
@@ -87,9 +113,9 @@ public class QRCodeServiceImpl implements QRCodeService {
             case VEHICLE -> entity.setDetails(vehicleDetailsMapper.toEntity((VehicleDetailsDto) req.getDetails()));
             case CHILD -> entity.setDetails(childDetailsMapper.toEntity((ChildDetailsDto) req.getDetails()));
             case LUGGAGE -> entity.setDetails(luggageDetailsMapper.toEntity((LuggageDetailsDto) req.getDetails()));
-            case LOCKSCREEN -> entity.setDetails(lockscreenDetailsMapper.toEntity((LockscreenDetailsDto) req.getDetails()));
+            case LOCKSCREEN ->
+                    entity.setDetails(lockscreenDetailsMapper.toEntity((LockscreenDetailsDto) req.getDetails()));
             default -> throw new IllegalArgumentException("Unsupported QR type: " + req.getType());
         }
     }
 }
-

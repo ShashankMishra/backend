@@ -4,8 +4,8 @@ import com.qrust.api.dto.QRCodeRequest;
 import com.qrust.api.dto.QRCodeResponse;
 import com.qrust.domain.QRCode;
 import com.qrust.service.QRCodeService;
+import io.quarkus.security.Authenticated;
 import jakarta.annotation.security.PermitAll;
-import jakarta.annotation.security.RolesAllowed;
 import jakarta.inject.Inject;
 import jakarta.validation.Valid;
 import jakarta.ws.rs.*;
@@ -24,13 +24,13 @@ public class QRCodeController {
     QRCodeService qrCodeService;
 
     @POST
+    @Authenticated // Only authenticated users can create
     public Response create(@Valid QRCodeRequest request) {
         QRCode qrCode = qrCodeService.createQr(request);
         return Response.status(Response.Status.CREATED).entity(qrCodeService.toResponse(qrCode)).build();
     }
 
     @GET
-    @RolesAllowed("*")
     public List<QRCodeResponse> getAll() {
         List<QRCode> allQrs = qrCodeService.getAllQrs();
         List<QRCodeResponse> response = allQrs.stream()
@@ -50,7 +50,7 @@ public class QRCodeController {
 
     @PUT
     @Path("/{id}")
-    @RolesAllowed("*")
+    @Authenticated
     public Response update(@PathParam("id") UUID id, @Valid QRCodeRequest request) {
         QRCode qrCode = qrCodeService.updateQr(id, request);
         if (qrCode == null) return Response.status(Response.Status.NOT_FOUND).build();
@@ -59,10 +59,9 @@ public class QRCodeController {
 
     @DELETE
     @Path("/{id}")
-    @RolesAllowed("*")
+    @Authenticated
     public Response delete(@PathParam("id") UUID id) {
         qrCodeService.deleteQr(id);
         return Response.noContent().build();
     }
 }
-
