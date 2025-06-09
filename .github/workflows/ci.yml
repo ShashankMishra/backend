@@ -77,7 +77,7 @@ jobs:
       - name: Render ECS task definition with new image tag
         run: |
           IMAGE_NAME=ghcr.io/${{ github.repository }}/backend:${GITHUB_SHA}
-          jq '.containerDefinitions[0].image = $IMAGE_NAME' ecs-task-def-base.json > ecs-task-def.json
+          jq --arg IMAGE_NAME "$IMAGE_NAME" '.containerDefinitions[0].image = $IMAGE_NAME' ecs-task-def-base.json > ecs-task-def.json
 
       - name: Deploy to Amazon ECS
         uses: aws-actions/amazon-ecs-deploy-task-definition@v1
