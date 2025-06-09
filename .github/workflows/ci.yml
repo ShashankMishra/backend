@@ -86,3 +86,4 @@ jobs:
           service: ${{ secrets.ECS_SERVICE_NAME }}
           cluster: ${{ secrets.ECS_CLUSTER_NAME }}
           wait-for-service-stability: true
+          force-new-deployment: true
