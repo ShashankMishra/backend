@@ -1,14 +1,14 @@
 {
-  "family": "backend-task-def",
-  "networkMode": "awsvpc",
-  "requiresCompatibilities": ["FARGATE"],
-  "cpu": "256",
-  "memory": "512",
+  "taskDefinitionArn": "arn:aws:ecs:ap-south-1:947931883961:task-definition/backend-task-def:7",
   "containerDefinitions": [
     {
-      "name": "backend",
+      "name": "qrust-backend",
       "image": "ghcr.io/shashankmishra/backend/backend:ci",
-      "essential": true,
+      "repositoryCredentials": {
+        "credentialsParameter": "arn:aws:secretsmanager:ap-south-1:947931883961:secret:ecs_ghcr_pull_token-jjBw8O"
+      },
+      "cpu": 512,
+      "memory": 1024,
       "portMappings": [
         {
           "containerPort": 8080,
@@ -16,18 +16,66 @@
           "protocol": "tcp"
         }
       ],
+      "essential": true,
       "environment": [],
+      "mountPoints": [],
+      "volumesFrom": [],
       "logConfiguration": {
         "logDriver": "awslogs",
         "options": {
           "awslogs-group": "/ecs/backend",
-          "awslogs-region": "us-east-1",
+          "mode": "non-blocking",
+          "awslogs-region": "ap-south-1",
           "awslogs-stream-prefix": "ecs"
         }
-      }
+      },
+      "systemControls": []
     }
   ],
-  "executionRoleArn": "arn:aws:iam::123456789012:role/ecsTaskExecutionRole",
-  "taskRoleArn": "arn:aws:iam::123456789012:role/ecsTaskExecutionRole"
+  "family": "backend-task-def",
+  "taskRoleArn": "arn:aws:iam::947931883961:role/ecsTaskRole",
+  "executionRoleArn": "arn:aws:iam::947931883961:role/ecsTaskExecutionRole",
+  "networkMode": "awsvpc",
+  "revision": 7,
+  "volumes": [],
+  "status": "ACTIVE",
+  "requiresAttributes": [
+    {
+      "name": "com.amazonaws.ecs.capability.logging-driver.awslogs"
+    },
+    {
+      "name": "ecs.capability.execution-role-awslogs"
+    },
+    {
+      "name": "com.amazonaws.ecs.capability.docker-remote-api.1.19"
+    },
+    {
+      "name": "com.amazonaws.ecs.capability.docker-remote-api.1.28"
+    },
+    {
+      "name": "ecs.capability.private-registry-authentication.secretsmanager"
+    },
+    {
+      "name": "com.amazonaws.ecs.capability.task-iam-role"
+    },
+    {
+      "name": "com.amazonaws.ecs.capability.docker-remote-api.1.18"
+    },
+    {
+      "name": "ecs.capability.task-eni"
+    }
+  ],
+  "placementConstraints": [],
+  "compatibilities": [
+    "EC2",
+    "FARGATE"
+  ],
+  "requiresCompatibilities": [
+    "FARGATE"
+  ],
+  "cpu": "512",
+  "memory": "1024",
+  "registeredAt": "2025-06-08T18:14:21.675Z",
+  "registeredBy": "arn:aws:iam::947931883961:root",
+  "tags": []
 }
-
