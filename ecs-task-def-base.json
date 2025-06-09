@@ -1,5 +1,5 @@
 {
-  "taskDefinitionArn": "arn:aws:ecs:ap-south-1:947931883961:task-definition/backend-task-def:7",
+  "family": "backend-task-def",
   "containerDefinitions": [
     {
       "name": "qrust-backend",
@@ -32,50 +32,14 @@
       "systemControls": []
     }
   ],
-  "family": "backend-task-def",
   "taskRoleArn": "arn:aws:iam::947931883961:role/ecsTaskRole",
   "executionRoleArn": "arn:aws:iam::947931883961:role/ecsTaskExecutionRole",
   "networkMode": "awsvpc",
-  "revision": 7,
   "volumes": [],
-  "status": "ACTIVE",
-  "requiresAttributes": [
-    {
-      "name": "com.amazonaws.ecs.capability.logging-driver.awslogs"
-    },
-    {
-      "name": "ecs.capability.execution-role-awslogs"
-    },
-    {
-      "name": "com.amazonaws.ecs.capability.docker-remote-api.1.19"
-    },
-    {
-      "name": "com.amazonaws.ecs.capability.docker-remote-api.1.28"
-    },
-    {
-      "name": "ecs.capability.private-registry-authentication.secretsmanager"
-    },
-    {
-      "name": "com.amazonaws.ecs.capability.task-iam-role"
-    },
-    {
-      "name": "com.amazonaws.ecs.capability.docker-remote-api.1.18"
-    },
-    {
-      "name": "ecs.capability.task-eni"
-    }
-  ],
   "placementConstraints": [],
-  "compatibilities": [
-    "EC2",
-    "FARGATE"
-  ],
   "requiresCompatibilities": [
     "FARGATE"
   ],
   "cpu": "512",
-  "memory": "1024",
-  "registeredAt": "2025-06-08T18:14:21.675Z",
-  "registeredBy": "arn:aws:iam::947931883961:root",
-  "tags": []
+  "memory": "1024"
 }
