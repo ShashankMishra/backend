@@ -1,9 +1,7 @@
 package com.qrust.mapper;
 
 import com.qrust.api.dto.VehicleDetailsDto;
-import com.qrust.api.dto.ContactDto;
 import com.qrust.domain.VehicleDetails;
-import com.qrust.domain.Contact;
 
 public class VehicleDetailsMapper implements QRDetailsMapper<VehicleDetailsDto, VehicleDetails> {
     @Override

@@ -1,8 +1,8 @@
 package com.qrust.api.dto;
 
 import com.qrust.domain.QRType;
-import jakarta.validation.constraints.NotNull;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
 @Data

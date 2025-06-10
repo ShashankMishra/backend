@@ -3,8 +3,6 @@ package com.qrust.mapper;
 import com.qrust.api.dto.MedicalDetailsDto;
 import com.qrust.domain.MedicalDetails;
 
-import java.util.Optional;
-
 public class MedicalDetailsMapper {
     private MedicalDetailsMapper() {
     }

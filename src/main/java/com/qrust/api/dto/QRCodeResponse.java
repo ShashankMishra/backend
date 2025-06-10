@@ -1,10 +1,9 @@
 package com.qrust.api.dto;
 
-import com.qrust.domain.QRDetails;
-import com.qrust.domain.QRType;
 import com.qrust.domain.PlanType;
-import com.qrust.domain.User;
+import com.qrust.domain.QRDetails;
 import com.qrust.domain.QRStatus;
+import com.qrust.domain.QRType;
 import lombok.Data;
 
 import java.time.LocalDateTime;

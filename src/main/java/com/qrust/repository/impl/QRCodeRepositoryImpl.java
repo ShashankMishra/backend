@@ -4,11 +4,11 @@ import com.qrust.domain.QRCode;
 import com.qrust.repository.QRCodeRepository;
 import io.opentelemetry.instrumentation.annotations.WithSpan;
 import jakarta.enterprise.context.ApplicationScoped;
+import lombok.extern.slf4j.Slf4j;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbEnhancedClient;
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbTable;
 import software.amazon.awssdk.enhanced.dynamodb.TableSchema;
-import lombok.extern.slf4j.Slf4j;
 
 import java.util.List;
 import java.util.Optional;

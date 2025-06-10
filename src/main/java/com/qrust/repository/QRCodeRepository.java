@@ -1,6 +1,7 @@
 package com.qrust.repository;
 
 import com.qrust.domain.QRCode;
+
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
