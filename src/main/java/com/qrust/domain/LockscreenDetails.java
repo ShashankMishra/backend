@@ -10,5 +10,5 @@ public class LockscreenDetails implements QRDetails{
     private String deviceName;
     private Contact ownerContact;
     private Contact emergencyContact;
-    private Optional<MedicalDetails> medicalDetails;
+    private MedicalDetails medicalDetails;
 }

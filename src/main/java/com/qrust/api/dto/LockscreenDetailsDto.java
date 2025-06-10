@@ -1,12 +1,8 @@
 package com.qrust.api.dto;
 
-import com.qrust.domain.Contact;
-import com.qrust.domain.MedicalDetails;
 import com.qrust.domain.QRType;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
-
-import java.util.Optional;
 
 @Data
 public class LockscreenDetailsDto implements QRDetailsDto {
@@ -18,6 +14,6 @@ public class LockscreenDetailsDto implements QRDetailsDto {
     private ContactDto ownerContact;
     @NotNull
     private ContactDto emergencyContact;
-    private Optional<MedicalDetailsDto> medicalDetails;
+    private MedicalDetailsDto medicalDetails;
 }
 

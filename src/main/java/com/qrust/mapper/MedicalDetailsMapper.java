@@ -9,16 +9,15 @@ public class MedicalDetailsMapper {
     private MedicalDetailsMapper() {
     }
 
-    public static Optional<MedicalDetails> map(Optional<MedicalDetailsDto> dtoOptional) {
+    public static MedicalDetails map(MedicalDetailsDto medicalDetailsDto) {
         // map if exists, otherwise return null
-        if (dtoOptional.isEmpty()) return null;
-        var md = new MedicalDetails();
-        var dto = dtoOptional.get();
-        md.setBloodGroup(dto.getBloodGroup());
-        md.setAllergies(dto.getAllergies());
-        md.setCurrentMedications(dto.getCurrentMedications());
-        md.setMedicalHistory(dto.getMedicalHistory());
-        return Optional.of(md);
+        if (medicalDetailsDto == null) return null;
+        var medicalDetails = new MedicalDetails();
+        medicalDetails.setBloodGroup(medicalDetailsDto.getBloodGroup());
+        medicalDetails.setAllergies(medicalDetailsDto.getAllergies());
+        medicalDetails.setCurrentMedications(medicalDetailsDto.getCurrentMedications());
+        medicalDetails.setMedicalHistory(medicalDetailsDto.getMedicalHistory());
+        return medicalDetails;
     }
 }
 
