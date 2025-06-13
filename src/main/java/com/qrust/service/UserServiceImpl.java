@@ -21,12 +21,8 @@ public class UserServiceImpl implements UserService {
             return null;
         }
         User user = new User();
-        // OIDC subject (sub) is a stable unique identifier
         String sub = securityIdentity.getPrincipal().getName();
         user.setUserId(sub);
-        // Optionally set more fields if present in claims
-        String email = securityIdentity.getAttribute("email");
-        log.info("Current user id, email: " + sub + "," + email);
         return user;
     }
 }
