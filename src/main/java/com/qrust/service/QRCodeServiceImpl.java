@@ -51,11 +51,12 @@ public class QRCodeServiceImpl implements QRCodeService {
         if (qrCode.getOwner() == null || !qrCode.getOwner().getUserId().equals(currentUser.getUserId())) {
             throw new UnauthorizedException("You do not have permission to update this QR code.");
         }
-        // If the QR code is assigned, only the owner can update it
-        QRCode updated = toEntity(req);
-        qrCode.setDetails(updated.getDetails());
-        qrCodeRepository.save(updated);
-        return updated;
+        // Update all fields from req
+        qrCode.setStatus(req.getStatus());
+        qrCode.setPlanType(req.getPlanType());
+        updateQrDetails(qrCode, req);
+        qrCodeRepository.save(qrCode);
+        return qrCode;
     }
 
     @Override
