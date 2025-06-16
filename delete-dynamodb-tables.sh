@@ -4,7 +4,7 @@
 set -e
 
 # List your table names here (update as needed)
-TABLES=("QRCode")
+TABLES=("QRCodeTable" "scanHistory")
 
 for TABLE in "${TABLES[@]}"; do
   echo "Deleting table: $TABLE"
@@ -12,4 +12,3 @@ for TABLE in "${TABLES[@]}"; do
 done
 
 echo "All specified tables deleted (if they existed)."
-

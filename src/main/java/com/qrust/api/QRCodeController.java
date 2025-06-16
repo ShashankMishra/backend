@@ -26,6 +26,10 @@ public class QRCodeController {
     @POST
     @Authenticated // Only authenticated users can create
     public Response create(@Valid QRCodeRequest request) {
+        if (getAll().size() >= 100) {
+            return Response.status(Response.Status.BAD_REQUEST)
+                    .entity("Maximum number of QR codes reached (100).").build();
+        }
         QRCode qrCode = qrCodeService.createQr(request);
         return Response.status(Response.Status.CREATED).entity(qrCodeService.toResponse(qrCode)).build();
     }
