@@ -1,5 +1,6 @@
 package com.qrust.service;
 
+import com.qrust.api.dto.QRCodePublicResponse;
 import com.qrust.api.dto.QRCodeRequest;
 import com.qrust.api.dto.QRCodeResponse;
 import com.qrust.domain.QRCode;
@@ -15,5 +16,6 @@ public interface QRCodeService {
     QRCode getQr(UUID id);
 
     QRCodeResponse toResponse(QRCode entity);
+    QRCodePublicResponse toPublicResponse(QRCode entity);
 }
 

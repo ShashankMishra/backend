@@ -119,4 +119,14 @@ public class QRCodeServiceImpl implements QRCodeService {
             default -> throw new IllegalArgumentException("Unsupported QR type: " + req.getType());
         }
     }
+
+    @Override
+    public QRCodePublicResponse toPublicResponse(QRCode entity) {
+        if (entity == null) return null;
+        QRCodePublicResponse resp = new QRCodePublicResponse();
+        resp.setId(entity.getId());
+        resp.setType(entity.getType());
+        resp.setDetails(entity.getDetails());
+        return resp;
+    }
 }

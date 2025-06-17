@@ -8,5 +8,7 @@ public interface ScanRepository {
     void save(ScanHistory history);
 
     ScanHistory findLatestByIpAndQrId(String scannerIp, UUID qrId);
+
+    ScanHistory getScan(UUID scanId);
 }
 

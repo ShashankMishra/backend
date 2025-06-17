@@ -4,21 +4,21 @@ import com.qrust.domain.QRCode;
 import com.qrust.domain.ScanHistory;
 import com.qrust.service.QRCodeService;
 import com.qrust.service.ScanService;
+import io.quarkus.security.Authenticated;
 import jakarta.annotation.security.PermitAll;
 import jakarta.inject.Inject;
-import jakarta.ws.rs.*;
-import jakarta.ws.rs.core.*;
+import jakarta.ws.rs.GET;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.PathParam;
+import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
 import lombok.extern.slf4j.Slf4j;
-import org.eclipse.microprofile.config.inject.ConfigProperty;
 
-import java.net.URI;
-import java.time.Instant;
 import java.util.UUID;
 
-@Path("/scan")
+@Path("/scans")
 @Produces(MediaType.APPLICATION_JSON)
-@Consumes(MediaType.APPLICATION_JSON)
-@PermitAll
 @Slf4j
 public class ScanController {
 
@@ -28,49 +28,17 @@ public class ScanController {
     @Inject
     QRCodeService qrCodeService;
 
-    @ConfigProperty(name = "quarkus.frontend.uri")
-    String frontendUri;
-
     @GET
-    @Path("/{qrId}")
-    public Response scan(@PathParam("qrId") UUID qrId,
-                         @Context HttpHeaders headers,
-                         @Context UriInfo uriInfo) {
-        log.info("Scan QR: {}", qrId);
-
-        QRCode qrCode = qrCodeService.getQr(qrId);
-        if (qrCode == null) {
-            return Response.status(Response.Status.NOT_FOUND)
-                    .entity("QR Code not found")
-                    .build();
+    @Path("/{scanId}")
+    @PermitAll
+    public Response get(@PathParam("scanId") UUID scanId) {
+        ScanHistory scanHistory = scanService.getScan(scanId);
+        if (scanHistory == null) {
+            return Response.status(Response.Status.NOT_FOUND).build();
         }
-
-        ScanHistory scanHistory = createScanHistory(qrId, headers, uriInfo);
-
-        URI redirectUrl = UriBuilder.fromUri(frontendUri)
-                .path("qr")
-                .path(scanHistory.getScanId().toString())
-                .build();
-
-        log.info("Redirecting to: {}", redirectUrl);
-
-        return Response.seeOther(redirectUrl).build();
+        QRCode qrCode = qrCodeService.getQr(scanHistory.getQrId());
+        return Response.ok(qrCodeService.toResponse(qrCode)).build();
     }
 
-    private ScanHistory createScanHistory(UUID qrId, HttpHeaders headers, UriInfo uriInfo) {
-        String ip = headers.getHeaderString("X-Forwarded-For");
-        if (ip == null) {
-            ip = uriInfo.getRequestUri().getHost(); // fallback
-        }
-        String userAgent = headers.getHeaderString("User-Agent");
 
-        ScanHistory history = new ScanHistory();
-        history.setScanId(UUID.randomUUID());
-        history.setQrId(qrId);
-        history.setScanTimestamp(Instant.now());
-        history.setScannerIp(ip);
-        history.setDeviceInfo(userAgent);
-
-        return scanService.save(history);
-    }
 }

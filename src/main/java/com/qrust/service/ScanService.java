@@ -6,6 +6,8 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
 
+import java.util.UUID;
+
 @ApplicationScoped
 @Slf4j
 public class ScanService {
@@ -23,5 +25,9 @@ public class ScanService {
         }
         scanRepository.save(history);
         return history;
+    }
+
+    public ScanHistory getScan(UUID scanId) {
+        return scanRepository.getScan(scanId);
     }
 }
