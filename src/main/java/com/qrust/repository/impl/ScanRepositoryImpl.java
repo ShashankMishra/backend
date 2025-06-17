@@ -31,32 +31,27 @@ public class ScanRepositoryImpl implements ScanRepository {
     }
 
     @Override
-    public ScanHistory findByIpAndQrId(String scannerIp, UUID qrId) {
-        log.info("Finding scan by IP: {} and QR ID: {}", scannerIp, qrId);
+    public ScanHistory findLatestByIpAndQrId(String scannerIp, UUID qrId) {
+        log.info("Finding latest scan for IP: {} and QR ID: {}", scannerIp, qrId);
 
         try {
-            // Perform query on GSI: scannerIp as partition key, qrId as sort key
             var results = table.index("scannerIp-qrId-index")
-                    .query(QueryConditional
-                            .keyEqualTo(k -> k
-                                    .partitionValue(scannerIp)
-                                    .sortValue(qrId.toString())));
+                    .query(QueryConditional.keyEqualTo(k ->
+                            k.partitionValue(scannerIp)
+                                    .sortValue(qrId.toString()))
+                    );
 
-            // Collect all matching items
-            List<ScanHistory> scanHistories = new ArrayList<>();
-            results.stream().forEach(page -> scanHistories.addAll(page.items()));
+            // Use a single-pass reduction to find the latest by timestamp
+            return results.stream()
+                    .flatMap(page -> page.items().stream())
+                    .max(Comparator.comparing(ScanHistory::getScanTimestamp))
+                    .orElse(null);
 
-            if (scanHistories.isEmpty()) {
-                log.info("No scan history found for IP: {} and QR ID: {}", scannerIp, qrId);
-                return null;
-            }
-
-            // Return the first match
-            return scanHistories.getFirst(); // Java 21+, otherwise use get(0)
         } catch (Exception e) {
-            log.error("Error querying DynamoDB for IP: {} and QR ID: {}", scannerIp, qrId, e);
+            log.error("Failed to fetch latest scan history for IP: {} and QR ID: {}", scannerIp, qrId, e);
             return null;
         }
     }
+
 
 }
