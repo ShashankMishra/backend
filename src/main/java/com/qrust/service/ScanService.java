@@ -15,7 +15,7 @@ public class ScanService {
     public ScanHistory save(ScanHistory history) {
 
         // if scan history already exists based on ip address and qrId within last 1 min then return existing history
-        ScanHistory existingHistory = scanRepository.findByIpAndQrId(history.getScannerIp(), history.getQrId());
+        ScanHistory existingHistory = scanRepository.findLatestByIpAndQrId(history.getScannerIp(), history.getQrId());
         if (existingHistory != null && existingHistory.getScanTimestamp().isAfter(history.getScanTimestamp().minusSeconds(60))) {
             log.info("Scan history already exists for IP: {} and QR ID: {} within the last minute. Returning existing history.",
                     history.getScannerIp(), history.getQrId());

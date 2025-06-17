@@ -7,6 +7,6 @@ import java.util.UUID;
 public interface ScanRepository {
     void save(ScanHistory history);
 
-    ScanHistory findByIpAndQrId(String scannerIp, UUID qrId);
+    ScanHistory findLatestByIpAndQrId(String scannerIp, UUID qrId);
 }
 
