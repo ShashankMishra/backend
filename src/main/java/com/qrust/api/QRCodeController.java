@@ -100,7 +100,7 @@ public class QRCodeController {
         ScanHistory scanHistory = createScanHistory(qrId, headers, uriInfo);
 
         URI redirectUrl = UriBuilder.fromUri(frontendUri)
-                .path("qr")
+                .path("scans")
                 .path(scanHistory.getScanId().toString())
                 .build();
 
