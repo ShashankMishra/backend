@@ -4,9 +4,11 @@ import com.qrust.api.dto.QRCodeRequest;
 import com.qrust.api.dto.QRCodeResponse;
 import com.qrust.domain.QRCode;
 import com.qrust.domain.ScanHistory;
+import com.qrust.exceptions.MaximumQRLimitReached;
 import com.qrust.service.QRCodeService;
 import com.qrust.service.ScanService;
 import io.quarkus.security.Authenticated;
+import io.vertx.ext.web.RoutingContext;
 import jakarta.annotation.security.PermitAll;
 import jakarta.inject.Inject;
 import jakarta.validation.Valid;
@@ -35,13 +37,10 @@ public class QRCodeController {
     @ConfigProperty(name = "quarkus.frontend.uri")
     String frontendUri;
 
+
     @POST
     @Authenticated
-    public Response create(@Valid QRCodeRequest request) {
-        if (getAll().size() >= 100) {
-            return Response.status(Response.Status.BAD_REQUEST)
-                    .entity("Maximum number of QR codes reached (100).").build();
-        }
+    public Response create(@Valid QRCodeRequest request) throws MaximumQRLimitReached {
         QRCode qrCode = qrCodeService.createQr(request);
         return Response.status(Response.Status.CREATED).entity(qrCodeService.toResponse(qrCode)).build();
     }
@@ -87,32 +86,36 @@ public class QRCodeController {
     @PermitAll
     public Response scan(@PathParam("qrId") UUID qrId,
                          @Context HttpHeaders headers,
-                         @Context UriInfo uriInfo) {
+                         @Context RoutingContext rc) {
         log.info("Scan QR: {}", qrId);
+        UriBuilder.fromUri(frontendUri).build();
+        URI redirectUrl;
+        try {
+            QRCode qrCode = qrCodeService.getQr(qrId);
+            if (qrCode == null) {
+                return Response.status(Response.Status.NOT_FOUND)
+                        .entity("QR Code not found")
+                        .build();
+            }
+            ScanHistory scanHistory = createScanHistory(qrId, headers, rc);
 
-        QRCode qrCode = qrCodeService.getQr(qrId);
-        if (qrCode == null) {
-            return Response.status(Response.Status.NOT_FOUND)
-                    .entity("QR Code not found")
+            redirectUrl = UriBuilder.fromUri(frontendUri)
+                    .path("scans")
+                    .path(scanHistory.getScanId().toString())
                     .build();
+        } catch (Exception e) {
+            log.error("Error processing scan for QR ID {}: {}", qrId, e.getMessage(), e);
+            redirectUrl = UriBuilder.fromUri(frontendUri).build();
         }
 
-        ScanHistory scanHistory = createScanHistory(qrId, headers, uriInfo);
-
-        URI redirectUrl = UriBuilder.fromUri(frontendUri)
-                .path("scans")
-                .path(scanHistory.getScanId().toString())
-                .build();
-
         log.info("Redirecting to: {}", redirectUrl);
-
         return Response.seeOther(redirectUrl).build();
     }
 
-    private ScanHistory createScanHistory(UUID qrId, HttpHeaders headers, UriInfo uriInfo) {
+    private ScanHistory createScanHistory(UUID qrId, HttpHeaders headers, RoutingContext rc) {
         String ip = headers.getHeaderString("X-Forwarded-For");
         if (ip == null) {
-            ip = uriInfo.getRequestUri().getHost(); // fallback
+            ip = rc.request().remoteAddress().host();// fallback
         }
         String userAgent = headers.getHeaderString("User-Agent");
 

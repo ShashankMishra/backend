@@ -15,6 +15,7 @@ import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import lombok.extern.slf4j.Slf4j;
 
+import java.util.List;
 import java.util.UUID;
 
 @Path("/scans")
@@ -38,6 +39,13 @@ public class ScanController {
         }
         QRCode qrCode = qrCodeService.getQr(scanHistory.getQrId());
         return Response.ok(qrCodeService.toResponse(qrCode)).build();
+    }
+
+    @GET
+    @Authenticated
+    public Response getAllScans() {
+        List<ScanHistory> scanHistory = scanService.getAllScanHistory();
+        return Response.ok(scanHistory).build();
     }
 
 

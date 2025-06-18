@@ -13,7 +13,7 @@ public class ScanLocation {
     private String country;
     private String region;
     private String city;
-    private String postalCode;
+    private String postal;
     private Double latitude;
     private Double longitude;
 }

@@ -1,4 +1,4 @@
-package com.qrust.api;
+package com.qrust.exceptions;
 
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.ext.ExceptionMapper;

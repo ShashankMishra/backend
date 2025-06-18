@@ -57,5 +57,27 @@ public class ScanRepositoryImpl implements ScanRepository {
         return table.getItem(r -> r.key(k -> k.partitionValue(scanId.toString())));
     }
 
+    @Override
+    public List<ScanHistory> getScanHistoryByQrIds(List<UUID> qrIds) {
+        log.info("Fetching scan history for QR IDs: {}", qrIds);
+        if (qrIds == null || qrIds.isEmpty()) {
+            return Collections.emptyList();
+        }
+        List<ScanHistory> results = new ArrayList<>();
+        // Use the qrId-index GSI for efficient querying by qrId
+        for (UUID qrId : qrIds) {
+            try {
+                var queryResults = table.index("qrId-index")
+                        .query(QueryConditional.keyEqualTo(k -> k.partitionValue(qrId.toString())));
+                queryResults.stream()
+                        .flatMap(page -> page.items().stream())
+                        .forEach(results::add);
+            } catch (Exception e) {
+                log.error("Failed to fetch scan history for QR ID: {}", qrId, e);
+            }
+        }
+        return results;
+    }
+
 
 }

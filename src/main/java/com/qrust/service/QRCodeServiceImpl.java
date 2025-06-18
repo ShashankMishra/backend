@@ -4,11 +4,14 @@ import com.qrust.api.dto.*;
 import com.qrust.domain.QRCode;
 import com.qrust.domain.QRStatus;
 import com.qrust.domain.User;
+import com.qrust.exceptions.MaximumQRLimitReached;
 import com.qrust.mapper.*;
 import com.qrust.repository.QRCodeRepository;
 import io.quarkus.security.UnauthorizedException;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import jakarta.ws.rs.core.Response;
+import org.eclipse.microprofile.config.inject.ConfigProperty;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -22,6 +25,10 @@ public class QRCodeServiceImpl implements QRCodeService {
     @Inject
     UserService userService;
 
+    @ConfigProperty(name = "quarkus.qr-plan.free.max-allowed")
+    int maxAllowedFreePlan;
+
+
     // Mappers
     private final PersonDetailsMapper personDetailsMapper = new PersonDetailsMapper();
     private final VehicleDetailsMapper vehicleDetailsMapper = new VehicleDetailsMapper();
@@ -30,7 +37,10 @@ public class QRCodeServiceImpl implements QRCodeService {
     private final LockscreenDetailsMapper lockscreenDetailsMapper = new LockscreenDetailsMapper();
 
     @Override
-    public QRCode createQr(QRCodeRequest req) {
+    public QRCode createQr(QRCodeRequest req) throws MaximumQRLimitReached {
+        if (getAllQrs().size() >= maxAllowedFreePlan) {
+            throw new MaximumQRLimitReached("Maximum number of QR codes reached.");
+        }
         QRCode entity = toEntity(req);
         entity.setId(UUID.randomUUID());
         entity.setCreatedAt(LocalDateTime.now());

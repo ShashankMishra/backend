@@ -8,6 +8,7 @@ import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbParti
 import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbSecondaryPartitionKey;
 import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbSecondarySortKey;
 
+import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.UUID;
 
@@ -29,13 +30,19 @@ public class ScanHistory {
         return scanId;
     }
 
-    @DynamoDbSecondaryPartitionKey(indexNames = "scannerIp-qrId-index")
+    @DynamoDbSecondaryPartitionKey(indexNames = {"scannerIp-qrId-index"})
     public String getScannerIp() {
         return scannerIp;
     }
 
-    @DynamoDbSecondarySortKey(indexNames = "scannerIp-qrId-index")
+    @DynamoDbSecondarySortKey(indexNames = {"scannerIp-qrId-index"})
+    @DynamoDbSecondaryPartitionKey(indexNames = {"qrId-index"})
     public UUID getQrId() {
         return qrId;
+    }
+
+    @DynamoDbSecondarySortKey(indexNames = {"scannerIp-qrId-index"})
+    public Instant getScanTimestamp() {
+        return scanTimestamp;
     }
 }
