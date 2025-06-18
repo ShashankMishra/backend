@@ -48,24 +48,21 @@ public class ScanService {
         scanRepository.save(history);
 
         CompletableFuture.runAsync(() -> {
+            String scanIp = getIpAddressOrElse(history.getScannerIp());
             try {
-                ScanLocation location = ipWhoIsClient.getLocation(getIpAddressOrElse(history.getScannerIp()));
+                ScanLocation location = ipWhoIsClient.getLocation(scanIp);
                 history.setLocation(location);
                 scanRepository.save(history);
                 log.info("Updated scan history with location: {}", location);
             } catch (Exception e) {
-                log.error("Failed to update scan history with location for ScanId: {}", history.getScanId(), e);
+                log.error("Failed to update scan history with location for scanIp: {}", scanIp, e);
             }
         });
     }
 
     private String getIpAddressOrElse(String scannerIp) {
         // return hardcoded IP if scannerIp is 127.0.0.1
-        Random rand = new Random();
-        String randomIp = rand.nextInt(256) + "." +
-                rand.nextInt(256) + "." +
-                rand.nextInt(256) + "." +
-                rand.nextInt(256);
+        String randomIp = "152.59.190.149";
         return LaunchMode.current() == LaunchMode.DEVELOPMENT ? randomIp : scannerIp;
     }
 

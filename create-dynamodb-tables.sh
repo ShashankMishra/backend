@@ -17,7 +17,7 @@ aws dynamodb create-table \
 # Create scanHistory table with GSI for scannerIp and qrId
 aws dynamodb create-table \
   --table-name scanHistory \
-  --attribute-definitions AttributeName=scanId,AttributeType=S AttributeName=scannerIp,AttributeType=S AttributeName=qrId,AttributeType=S \
+  --attribute-definitions AttributeName=scanId,AttributeType=S AttributeName=scannerIp,AttributeType=S AttributeName=qrId,AttributeType=S AttributeName=scanTimestamp,AttributeType=S \
   --key-schema AttributeName=scanId,KeyType=HASH \
   --global-secondary-indexes '[
     {

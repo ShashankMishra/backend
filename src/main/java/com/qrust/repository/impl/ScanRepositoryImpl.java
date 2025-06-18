@@ -78,6 +78,6 @@ public class ScanRepositoryImpl implements ScanRepository {
         }
         return results;
     }
-
-
 }
+
+
