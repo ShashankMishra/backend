@@ -1,6 +1,7 @@
 package com.qrust.domain;
 
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbBean;
@@ -9,6 +10,7 @@ import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbBean;
 @NoArgsConstructor
 @AllArgsConstructor
 @DynamoDbBean
+@Builder
 public class ScanLocation {
     private String country;
     private String region;

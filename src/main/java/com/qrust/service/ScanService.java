@@ -1,5 +1,6 @@
 package com.qrust.service;
 
+import com.qrust.api.dto.LocationRequest;
 import com.qrust.client.IpWhoIsClient;
 import com.qrust.domain.QRCode;
 import com.qrust.domain.ScanHistory;
@@ -8,12 +9,11 @@ import com.qrust.repository.ScanRepository;
 import io.quarkus.runtime.LaunchMode;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
-import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.eclipse.microprofile.rest.client.inject.RestClient;
 
 import java.util.List;
-import java.util.Random;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
@@ -75,5 +75,18 @@ public class ScanService {
         List<QRCode> allQr = qrCodeService.getAllQrs();
         List<UUID> qrIds = allQr.stream().map(QRCode::getId).toList();
         return scanRepository.getScanHistoryByQrIds(qrIds);
+    }
+
+    public void updateScanLocation(ScanHistory scanHistory, @Valid LocationRequest locationRequest) {
+        ScanLocation scanLocation = scanHistory.getLocation();
+        if (scanLocation == null) {
+            scanLocation = ScanLocation.builder().latitude(locationRequest.getLatitude()).longitude(locationRequest.getLongitude()).build();
+        } else {
+            scanLocation.setLatitude(locationRequest.getLatitude());
+            scanLocation.setLongitude(locationRequest.getLongitude());
+        }
+
+        scanHistory.setLocation(scanLocation);
+        scanRepository.save(scanHistory);
     }
 }

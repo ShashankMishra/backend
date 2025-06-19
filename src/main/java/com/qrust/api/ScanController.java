@@ -1,5 +1,7 @@
 package com.qrust.api;
 
+import com.qrust.api.dto.LocationRequest;
+import com.qrust.api.dto.QRCodeRequest;
 import com.qrust.domain.QRCode;
 import com.qrust.domain.ScanHistory;
 import com.qrust.service.QRCodeService;
@@ -7,10 +9,8 @@ import com.qrust.service.ScanService;
 import io.quarkus.security.Authenticated;
 import jakarta.annotation.security.PermitAll;
 import jakarta.inject.Inject;
-import jakarta.ws.rs.GET;
-import jakarta.ws.rs.Path;
-import jakarta.ws.rs.PathParam;
-import jakarta.ws.rs.Produces;
+import jakarta.validation.Valid;
+import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import lombok.extern.slf4j.Slf4j;
@@ -39,6 +39,19 @@ public class ScanController {
         }
         QRCode qrCode = qrCodeService.getQr(scanHistory.getQrId());
         return Response.ok(qrCodeService.toResponse(qrCode)).build();
+    }
+
+    @PUT
+    @Path("/{scanId}/location")
+    @PermitAll
+    public Response get(@PathParam("scanId") UUID scanId, @Valid LocationRequest locationRequest) {
+        ScanHistory scanHistory = scanService.getScan(scanId);
+        // @TODO add a check with current ip and scanHistory ip
+        if (scanHistory == null) {
+            return Response.status(Response.Status.NOT_FOUND).build();
+        }
+        scanService.updateScanLocation(scanHistory, locationRequest);
+        return Response.ok().build();
     }
 
     @GET
