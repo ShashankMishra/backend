@@ -78,17 +78,20 @@ public class ScanService {
         return scanRepository.getScanHistoryByQrIds(qrIds);
     }
 
-    public void updateScanLocation(ScanHistory scanHistory, @Valid LocationRequest locationRequest) {
+    public void updateScanLocation(ScanHistory scanHistory,LocationRequest locationRequest) {
         ScanLocation scanLocation = scanHistory.getLocation();
         if (scanLocation == null) {
             scanLocation = ScanLocation.builder()
                     .latitude(locationRequest.getLatitude())
                     .longitude(locationRequest.getLongitude())
-                    .city("Exact")
+                    .city(null)
+                    .isGpsEnabled(true)
                     .build();
         } else {
             scanLocation.setLatitude(locationRequest.getLatitude());
             scanLocation.setLongitude(locationRequest.getLongitude());
+            scanLocation.setCity(null);
+            scanLocation.setGpsEnabled(true);
         }
 
         scanHistory.setLocation(scanLocation);

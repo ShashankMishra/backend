@@ -18,4 +18,6 @@ public class ScanLocation {
     private String postal;
     private Double latitude;
     private Double longitude;
+    @Builder.Default
+    private boolean isGpsEnabled = false;
 }
