@@ -51,6 +51,7 @@ public class ScanService {
             String scanIp = getIpAddressOrElse(history.getScannerIp());
             try {
                 ScanLocation location = ipWhoIsClient.getLocation(scanIp);
+                history.setLocation(location);
                 scanRepository.save(history);
                 log.info("Updated scan history with location: {}", location);
             } catch (Exception e) {
