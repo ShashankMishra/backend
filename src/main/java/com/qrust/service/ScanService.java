@@ -51,8 +51,6 @@ public class ScanService {
             String scanIp = getIpAddressOrElse(history.getScannerIp());
             try {
                 ScanLocation location = ipWhoIsClient.getLocation(scanIp);
-                location.setCity(location.getCity() != null ? location.getCity() + " (Approx)" : "Unknown");
-                history.setLocation(location);
                 scanRepository.save(history);
                 log.info("Updated scan history with location: {}", location);
             } catch (Exception e) {
@@ -78,7 +76,7 @@ public class ScanService {
         return scanRepository.getScanHistoryByQrIds(qrIds);
     }
 
-    public void updateScanLocation(ScanHistory scanHistory,LocationRequest locationRequest) {
+    public void updateScanLocation(ScanHistory scanHistory, LocationRequest locationRequest) {
         ScanLocation scanLocation = scanHistory.getLocation();
         if (scanLocation == null) {
             scanLocation = ScanLocation.builder()
