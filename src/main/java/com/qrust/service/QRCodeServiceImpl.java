@@ -61,9 +61,6 @@ public class QRCodeServiceImpl implements QRCodeService {
         if (qrCode.getOwner() == null || !qrCode.getOwner().getUserId().equals(currentUser.getUserId())) {
             throw new UnauthorizedException("You do not have permission to update this QR code.");
         }
-        // Update all fields from req
-        qrCode.setStatus(req.getStatus());
-        qrCode.setPlanType(req.getPlanType());
         updateQrDetails(qrCode, req);
         qrCodeRepository.save(qrCode);
         return qrCode;
@@ -102,7 +99,6 @@ public class QRCodeServiceImpl implements QRCodeService {
         resp.setId(entity.getId());
         resp.setType(entity.getType());
         resp.setStatus(entity.getStatus());
-        resp.setPlanType(entity.getPlanType());
         resp.setCreatedAt(entity.getCreatedAt());
         resp.setDetails(entity.getDetails());
         return resp;
