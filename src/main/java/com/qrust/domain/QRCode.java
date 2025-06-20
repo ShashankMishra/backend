@@ -16,8 +16,7 @@ import java.util.UUID;
 @AllArgsConstructor
 public class QRCode {
     private UUID id;
-    private QRStatus status;
-    private PlanType planType;
+    private QRStatus status = QRStatus.ASSIGNED;
     private LocalDateTime createdAt;
     private QRType type;
     private User owner;

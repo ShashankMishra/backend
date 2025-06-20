@@ -112,8 +112,6 @@ public class QRCodeServiceImpl implements QRCodeService {
     private QRCode toEntity(QRCodeRequest req) {
         QRCode entity = new QRCode();
         entity.setType(req.getType());
-        entity.setStatus(req.getStatus());
-        entity.setPlanType(req.getPlanType());
         updateQrDetails(entity, req);
         return entity;
     }
