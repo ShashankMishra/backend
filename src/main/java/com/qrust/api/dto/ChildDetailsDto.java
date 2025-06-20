@@ -12,6 +12,7 @@ public class ChildDetailsDto implements QRDetailsDto {
     @NotNull
     private QRType qrType = QRType.CHILD;
     @NotBlank
+    @Size(max = 20)
     private String fullName;
     @Size(max = 30)
     private String schoolName;
