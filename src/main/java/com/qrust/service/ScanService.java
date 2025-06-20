@@ -96,4 +96,8 @@ public class ScanService {
         scanHistory.setLocation(scanLocation);
         scanRepository.save(scanHistory);
     }
+
+    public List<ScanHistory> getScanHistoryForQr(UUID qrId) {
+        return scanRepository.getScanHistoryByQrIds(List.of(qrId));
+    }
 }

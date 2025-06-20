@@ -112,6 +112,22 @@ public class QRCodeController {
         return Response.seeOther(redirectUrl).build();
     }
 
+    @GET
+    @Path("/{qrId}/scans")
+    @Authenticated
+    public Response scan(@PathParam("qrId") UUID qrId) {
+        log.info("Get All scans for QR: {}", qrId);
+
+        QRCode qrCode = qrCodeService.getQr(qrId);
+        if (qrCode == null) {
+            return Response.status(Response.Status.NOT_FOUND)
+                    .entity("QR Code not found")
+                    .build();
+        }
+        List<ScanHistory> scanHistory = scanService.getScanHistoryForQr(qrId);
+        return Response.ok(scanHistory).build();
+    }
+
     private ScanHistory createScanHistory(UUID qrId, HttpHeaders headers, RoutingContext rc) {
         String ip = headers.getHeaderString("X-Forwarded-For");
         if (ip == null) {

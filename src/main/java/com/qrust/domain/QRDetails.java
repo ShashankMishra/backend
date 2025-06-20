@@ -1,14 +1,14 @@
 package com.qrust.domain;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.qrust.JsonUtil;
 import lombok.SneakyThrows;
 
 public interface QRDetails {
 
     @SneakyThrows
     static QRDetails fromJson(String json) {
-        var mapper = new ObjectMapper();
+        var mapper = JsonUtil.createMapper();
         JsonNode node = mapper.readTree(json);
         QRType type = QRType.valueOf(node.get("type").asText());
 
@@ -23,6 +23,6 @@ public interface QRDetails {
 
     @SneakyThrows
     default String toJson() {
-        return new ObjectMapper().writeValueAsString(this);
+        return JsonUtil.createMapper().writeValueAsString(this);
     }
 }
