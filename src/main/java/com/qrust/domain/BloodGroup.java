@@ -9,7 +9,8 @@ public enum BloodGroup {
     AB_POSITIVE("AB+"),
     AB_NEGATIVE("AB-"),
     O_POSITIVE("O+"),
-    O_NEGATIVE("O-");
+    O_NEGATIVE("O-"),
+    DONT_KNOW("Don't Know");
 
     private final String bloodGroupValue;
 
