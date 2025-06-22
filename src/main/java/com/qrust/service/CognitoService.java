@@ -1,7 +1,6 @@
 package com.qrust.service;
 
 import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Inject;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import software.amazon.awssdk.services.cognitoidentityprovider.CognitoIdentityProviderClient;
 import software.amazon.awssdk.services.cognitoidentityprovider.model.AdminAddUserToGroupRequest;
@@ -28,6 +27,14 @@ public class CognitoService {
                 .username(username)
                 .groupName("normal")
                 .build());*/
+    }
+
+    public void downgradeUser(String username, String group) {
+        cognitoClient.adminRemoveUserFromGroup(AdminRemoveUserFromGroupRequest.builder()
+                .userPoolId(userPoolId)
+                .username(username)
+                .groupName(group)
+                .build());
     }
 }
 

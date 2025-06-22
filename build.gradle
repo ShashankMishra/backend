@@ -28,6 +28,8 @@ dependencies {
     implementation 'io.quarkus:quarkus-rest-client'
     implementation 'io.quarkus:quarkus-rest-client-jackson'
     implementation 'software.amazon.awssdk:cognitoidentityprovider:2.25.61'
+    implementation 'com.cashfree.pg.java:cashfree_pg:5.0.1'
+    implementation 'com.squareup.okhttp3:okhttp:4.12.0'
     annotationProcessor 'org.projectlombok:lombok:1.18.32'
 
     testImplementation 'io.quarkus:quarkus-junit5'
