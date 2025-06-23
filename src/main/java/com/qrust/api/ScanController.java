@@ -15,6 +15,7 @@ import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import lombok.extern.slf4j.Slf4j;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 
@@ -36,6 +37,10 @@ public class ScanController {
         ScanHistory scanHistory = scanService.getScan(scanId);
         if (scanHistory == null) {
             return Response.status(Response.Status.NOT_FOUND).build();
+        }
+        // Check if the scan history is older than 2 minute
+        if (scanHistory.getScanTimestamp().isBefore(Instant.now().minusSeconds(180))) {
+            return Response.status(Response.Status.PRECONDITION_FAILED).build();
         }
         QRCode qrCode = qrCodeService.getQr(scanHistory.getQrId());
         return Response.ok(qrCodeService.toResponse(qrCode)).build();

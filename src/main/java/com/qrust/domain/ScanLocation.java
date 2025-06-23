@@ -12,10 +12,6 @@ import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbBean;
 @DynamoDbBean
 @Builder
 public class ScanLocation {
-    private String country;
-    private String region;
-    private String city;
-    private String postal;
     private Double latitude;
     private Double longitude;
     @Builder.Default

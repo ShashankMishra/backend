@@ -9,10 +9,10 @@ import com.qrust.repository.ScanRepository;
 import io.quarkus.runtime.LaunchMode;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.microprofile.rest.client.inject.RestClient;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
@@ -38,7 +38,8 @@ public class ScanService {
         if (existingHistory != null && existingHistory.getScanTimestamp().isAfter(history.getScanTimestamp().minusSeconds(60))) {
             log.info("Scan history already exists for IP: {} and QR ID: {} within the last minute. Returning existing history.",
                     history.getScannerIp(), history.getQrId());
-            return existingHistory;
+            history = existingHistory;
+            history.setScanTimestamp(Instant.now());
         }
         saveWithLocation(history);
         return history;
@@ -83,13 +84,11 @@ public class ScanService {
             scanLocation = ScanLocation.builder()
                     .latitude(locationRequest.getLatitude())
                     .longitude(locationRequest.getLongitude())
-                    .city(null)
                     .isGpsEnabled(true)
                     .build();
         } else {
             scanLocation.setLatitude(locationRequest.getLatitude());
             scanLocation.setLongitude(locationRequest.getLongitude());
-            scanLocation.setCity(null);
             scanLocation.setGpsEnabled(true);
         }
 
