@@ -63,6 +63,12 @@ public class ScanController {
     @Authenticated
     public Response getAllScans() {
         List<ScanHistory> scanHistory = scanService.getAllScanHistory();
+        // sort scan history by scan timestamp in descending order and just send latest 10
+        scanHistory.sort((s1, s2) -> s2.getScanTimestamp().compareTo(s1.getScanTimestamp()));
+        if (scanHistory.size() > 20) {
+            scanHistory = scanHistory.subList(0, 20);
+        }
+        // Convert to QRCodeResponse
         return Response.ok(scanHistory).build();
     }
 
