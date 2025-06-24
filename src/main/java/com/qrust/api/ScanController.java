@@ -1,7 +1,6 @@
 package com.qrust.api;
 
 import com.qrust.api.dto.LocationRequest;
-import com.qrust.api.dto.QRCodeRequest;
 import com.qrust.domain.QRCode;
 import com.qrust.domain.ScanHistory;
 import com.qrust.service.QRCodeService;

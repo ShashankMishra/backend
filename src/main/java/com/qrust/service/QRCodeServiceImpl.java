@@ -10,7 +10,6 @@ import com.qrust.repository.QRCodeRepository;
 import io.quarkus.security.UnauthorizedException;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-import jakarta.ws.rs.core.Response;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 
 import java.time.LocalDateTime;
@@ -25,8 +24,8 @@ public class QRCodeServiceImpl implements QRCodeService {
     @Inject
     UserService userService;
 
-    @ConfigProperty(name = "quarkus.qr-plan.free.max-allowed")
-    int maxAllowedFreePlan;
+    @Inject
+    UserLimitService userLimitService;
 
 
     // Mappers
@@ -38,8 +37,8 @@ public class QRCodeServiceImpl implements QRCodeService {
 
     @Override
     public QRCode createQr(QRCodeRequest req) throws MaximumQRLimitReached {
-        if (getAllQrs().size() >= maxAllowedFreePlan) {
-            throw new MaximumQRLimitReached("Maximum number of QR codes reached.");
+        if (getAllQrs().size() >= userLimitService.getLimitForUser(userService.getCurrentUser())) {
+            throw new MaximumQRLimitReached("QR code limit reached, Please upgrade your plan to create more QR's.");
         }
         QRCode entity = toEntity(req);
         entity.setId(UUID.randomUUID());

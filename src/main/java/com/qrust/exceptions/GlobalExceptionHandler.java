@@ -1,5 +1,6 @@
 package com.qrust.exceptions;
 
+import com.qrust.exceptions.MaximumQRLimitReached;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.ext.ExceptionMapper;
 import jakarta.ws.rs.ext.Provider;
@@ -12,9 +13,13 @@ public class GlobalExceptionHandler implements ExceptionMapper<Exception> {
     @Override
     public Response toResponse(Exception exception) {
         LOG.error("Unhandled exception caught", exception);
+        if (exception instanceof MaximumQRLimitReached) {
+            return Response.status(Response.Status.BAD_REQUEST)
+                    .entity(exception.getMessage())
+                    .build();
+        }
         return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
                 .entity("An unexpected error occurred. Please try again later.")
                 .build();
     }
 }
-
