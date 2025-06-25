@@ -24,7 +24,7 @@ public class PaymentController {
     PaymentService paymentService;
 
     @Inject
-    @ConfigProperty("cashfree.client-id")
+    @ConfigProperty(name="cashfree.client-id",defaultValue = "dummy-client-id")
     String cashfreeClientId;
 
     @POST
