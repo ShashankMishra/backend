@@ -1,6 +1,5 @@
 package com.qrust.exceptions;
 
-import com.qrust.exceptions.MaximumQRLimitReached;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.ext.ExceptionMapper;
 import jakarta.ws.rs.ext.Provider;
@@ -23,3 +22,4 @@ public class GlobalExceptionHandler implements ExceptionMapper<Exception> {
                 .build();
     }
 }
+
