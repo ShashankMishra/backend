@@ -4,7 +4,7 @@ import com.qrust.api.dto.*;
 import com.qrust.domain.QRCode;
 import com.qrust.domain.QRStatus;
 import com.qrust.domain.User;
-import com.qrust.exceptions.MaximumQRLimitReached;
+import com.qrust.exceptions.LimitReached;
 import com.qrust.mapper.*;
 import com.qrust.repository.QRCodeRepository;
 import io.quarkus.security.UnauthorizedException;
@@ -35,9 +35,9 @@ public class QRCodeServiceImpl implements QRCodeService {
     private final LockscreenDetailsMapper lockscreenDetailsMapper = new LockscreenDetailsMapper();
 
     @Override
-    public QRCode createQr(QRCodeRequest req) throws MaximumQRLimitReached {
+    public QRCode createQr(QRCodeRequest req) throws LimitReached {
         if (getAllQrs().size() >= userLimitService.getQrLimitForUser(userService.getCurrentUser())) {
-            throw new MaximumQRLimitReached("QR code limit reached, Please upgrade your plan to create more QR's.");
+            throw new LimitReached("QR code limit reached, Please upgrade your plan to create more QR's.");
         }
         QRCode entity = toEntity(req);
         entity.setId(UUID.randomUUID());

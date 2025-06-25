@@ -4,13 +4,13 @@ import com.qrust.api.dto.QRCodePublicResponse;
 import com.qrust.api.dto.QRCodeRequest;
 import com.qrust.api.dto.QRCodeResponse;
 import com.qrust.domain.QRCode;
-import com.qrust.exceptions.MaximumQRLimitReached;
+import com.qrust.exceptions.LimitReached;
 
 import java.util.List;
 import java.util.UUID;
 
 public interface QRCodeService {
-    QRCode createQr(QRCodeRequest req) throws MaximumQRLimitReached;
+    QRCode createQr(QRCodeRequest req) throws LimitReached;
     QRCode updateQr(UUID qrId, QRCodeRequest req);
     void deleteQr(UUID qrId);
     List<QRCode> getAllQrs();

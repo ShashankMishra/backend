@@ -12,7 +12,7 @@ public class GlobalExceptionHandler implements ExceptionMapper<Exception> {
     @Override
     public Response toResponse(Exception exception) {
         LOG.error("Unhandled exception caught", exception);
-        if (exception instanceof MaximumQRLimitReached) {
+        if (exception instanceof LimitReached) {
             return Response.status(Response.Status.BAD_REQUEST)
                     .entity(exception.getMessage())
                     .build();

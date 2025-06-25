@@ -4,7 +4,7 @@ import com.qrust.api.dto.QRCodeRequest;
 import com.qrust.api.dto.QRCodeResponse;
 import com.qrust.domain.QRCode;
 import com.qrust.domain.ScanHistory;
-import com.qrust.exceptions.MaximumQRLimitReached;
+import com.qrust.exceptions.LimitReached;
 import com.qrust.service.QRCodeService;
 import com.qrust.service.ScanService;
 import io.quarkus.security.Authenticated;
@@ -40,7 +40,7 @@ public class QRCodeController {
 
     @POST
     @Authenticated
-    public Response create(@Valid QRCodeRequest request) throws MaximumQRLimitReached {
+    public Response create(@Valid QRCodeRequest request) throws LimitReached {
         QRCode qrCode = qrCodeService.createQr(request);
         return Response.status(Response.Status.CREATED).entity(qrCodeService.toResponse(qrCode)).build();
     }
@@ -134,6 +134,7 @@ public class QRCodeController {
     }
 
     private ScanHistory createScanHistory(UUID qrId, HttpHeaders headers, RoutingContext rc) {
+
         String ip = headers.getHeaderString("X-Forwarded-For");
         if (ip == null) {
             ip = rc.request().remoteAddress().host();// fallback

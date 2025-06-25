@@ -5,6 +5,7 @@ import com.qrust.client.IpWhoIsClient;
 import com.qrust.domain.QRCode;
 import com.qrust.domain.ScanHistory;
 import com.qrust.domain.ScanLocation;
+import com.qrust.exceptions.LimitReached;
 import com.qrust.repository.ScanRepository;
 import io.quarkus.runtime.LaunchMode;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -14,6 +15,7 @@ import org.eclipse.microprofile.rest.client.inject.RestClient;
 
 import java.time.Instant;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
@@ -27,18 +29,31 @@ public class ScanService {
     QRCodeService qrCodeService;
 
     @Inject
+    UserLimitService userLimitService;
+
+    @Inject
+    UserService userService;
+
+    @Inject
     @RestClient
     IpWhoIsClient ipWhoIsClient;
 
 
     public ScanHistory save(ScanHistory history) {
 
+        List<ScanHistory> scanHistoryForQr = getScanHistoryForQr(history.getQrId());
+        if (scanHistoryForQr.size() >= userLimitService.getScanLimitForUser(userService.getCurrentUser())) {
+            throw new LimitReached("Scan limit reached, Owner need to upgrade plan to allow more scans.");
+        }
         // if scan history already exists based on ip address and qrId within last 1 min then return existing history
-        ScanHistory existingHistory = scanRepository.findLatestByIpAndQrId(history.getScannerIp(), history.getQrId());
-        if (existingHistory != null && existingHistory.getScanTimestamp().isAfter(history.getScanTimestamp().minusSeconds(60))) {
+        ScanHistory finalHistory = history;
+        Optional<ScanHistory> existingHistory = scanHistoryForQr.stream().filter(h -> h.getScannerIp().equals(finalHistory.getScannerIp()) && h.getQrId().equals(finalHistory.getQrId()))
+                .findFirst();
+
+        if (existingHistory.isPresent() && existingHistory.get().getScanTimestamp().isAfter(history.getScanTimestamp().minusSeconds(60))) {
             log.info("Scan history already exists for IP: {} and QR ID: {} within the last minute. Returning existing history.",
                     history.getScannerIp(), history.getQrId());
-            history = existingHistory;
+            history = existingHistory.get();
             history.setScanTimestamp(Instant.now());
         }
         saveWithLocation(history);
