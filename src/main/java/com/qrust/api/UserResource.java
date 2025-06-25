@@ -1,4 +1,4 @@
-package com.qrust.resource;
+package com.qrust.api;
 
 import com.qrust.service.CognitoService;
 import io.quarkus.security.Authenticated;
