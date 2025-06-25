@@ -10,19 +10,28 @@ import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.HttpHeaders;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
+import lombok.extern.slf4j.Slf4j;
+import org.eclipse.microprofile.config.inject.ConfigProperty;
 
 
 @Path("/payment")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
+@Slf4j
 public class PaymentController {
 
     @Inject
     PaymentService paymentService;
 
+    @Inject
+    @ConfigProperty("cashfree.client-id")
+    String cashfreeClientId;
+
     @POST
     @Path("/create-order")
     public Response createOrder(CreateOrderRequest requestDto) {
+        log.info("Create order: {}", requestDto);
+        log.info("Cashfree client id: {}", cashfreeClientId);
         OrderEntity orderEntity = paymentService.createOrder(requestDto.getPlanType());
         return Response.ok(orderEntity).build();
     }
