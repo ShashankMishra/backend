@@ -30,7 +30,7 @@ public class PaymentController {
     @POST
     @Path("/create-order")
     public Response createOrder(CreateOrderRequest requestDto) {
-        log.info("Create order: {}", requestDto);
+        log.info("Create a order: {}", requestDto);
         log.info("Cashfree client id: {}", cashfreeClientId);
         OrderEntity orderEntity = paymentService.createOrder(requestDto.getPlanType());
         return Response.ok(orderEntity).build();
