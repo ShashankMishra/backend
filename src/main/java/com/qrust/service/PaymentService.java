@@ -57,7 +57,7 @@ public class PaymentService {
 
     public OrderEntity createOrder(PlanType planType) {
         OrderMeta orderMeta = new OrderMeta();
-        orderMeta.setReturnUrl("http://localhost:5173/pricing?paymentStatus=success");
+        orderMeta.setReturnUrl(String.format("%s/pricing?paymentStatus=success", frontendUri));
         orderMeta.setNotifyUrl("https://webhook.site/1ac06e2c-65c3-4457-98c8-b4774129b67e");
 
         CustomerDetails customerDetails = new CustomerDetails();
