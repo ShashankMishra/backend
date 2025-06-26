@@ -7,6 +7,16 @@
       "repositoryCredentials": {
         "credentialsParameter": "arn:aws:secretsmanager:ap-south-1:947931883961:secret:ecs_ghcr_pull_token-jjBw8O"
       },
+      "secrets": [
+        {
+          "valueFrom": "arn:aws:secretsmanager:ap-south-1:947931883961:secret:pg_client_id-EL68Z6:CLIENT_ID::",
+          "name": "CLIENT_ID"
+        },
+        {
+          "valueFrom": "arn:aws:secretsmanager:ap-south-1:947931883961:secret:pg_client_secret-evRdNo:CLIENT_SECRET::",
+          "name": "CLIENT_SECRET"
+        }
+      ]
       "cpu": 512,
       "memory": 1024,
       "portMappings": [
