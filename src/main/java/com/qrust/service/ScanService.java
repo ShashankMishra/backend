@@ -41,8 +41,12 @@ public class ScanService {
 
     public ScanHistory save(ScanHistory history) {
 
+        QRCode qrCode = qrCodeService.getQr(history.getQrId());
+        if (qrCode == null) {
+            throw new IllegalArgumentException("QR Code not found for ID: " + history.getQrId());
+        }
         List<ScanHistory> scanHistoryForQr = getScanHistoryForQr(history.getQrId());
-        if (scanHistoryForQr.size() >= userLimitService.getScanLimitForUser(userService.getCurrentUser())) {
+        if (scanHistoryForQr.size() >= userLimitService.getScanLimitForUser(userService.getUserById(qrCode.getOwner().getUserId()))) {
             throw new LimitReached("Scan limit reached, Owner need to upgrade plan to allow more scans.");
         }
         // if scan history already exists based on ip address and qrId within last 1 min then return existing history

@@ -91,21 +91,24 @@ public class QRCodeController {
         UriBuilder.fromUri(frontendUri).build();
         URI redirectUrl;
         try {
-            QRCode qrCode = qrCodeService.getQr(qrId);
-            if (qrCode == null) {
-                return Response.status(Response.Status.NOT_FOUND)
-                        .entity("QR Code not found")
-                        .build();
-            }
+
             ScanHistory scanHistory = createScanHistory(qrId, headers, rc);
 
             redirectUrl = UriBuilder.fromUri(frontendUri)
                     .path("scans")
                     .path(scanHistory.getScanId().toString())
                     .build();
+        } catch (LimitReached | IllegalArgumentException e) {
+            log.warn("Limit reached for QR ID {}: {}", qrId, e.getMessage());
+            redirectUrl = UriBuilder.fromUri(frontendUri)
+                    .path("error")
+                    .queryParam("message", e.getMessage())
+                    .build();
         } catch (Exception e) {
             log.error("Error processing scan for QR ID {}: {}", qrId, e.getMessage(), e);
-            redirectUrl = UriBuilder.fromUri(frontendUri).build();
+            redirectUrl = UriBuilder.fromUri(frontendUri).path("error")
+                    .queryParam("message", "Server error occurred while processing your request, Please retry scaning")
+                    .build();
         }
 
         log.info("Redirecting to: {}", redirectUrl);

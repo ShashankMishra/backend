@@ -26,4 +26,10 @@ public class UserServiceImpl implements UserService {
         User user = new User(sub, FREE);
         return user;
     }
+
+    public User getUserById(String userId) {
+        // @TODO: Replace with actual user retrieval logic, e.g., from a database. so that we have current role
+        User user = new User(userId, FREE);
+        return user;
+    }
 }
