@@ -1,6 +1,6 @@
 package com.qrust.api;
 
-import com.qrust.service.CognitoService;
+import com.qrust.service.impl.CognitoService;
 import io.quarkus.security.Authenticated;
 import jakarta.annotation.security.RolesAllowed;
 import jakarta.inject.Inject;

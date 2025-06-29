@@ -6,7 +6,7 @@ import com.qrust.domain.QRCode;
 import com.qrust.domain.ScanHistory;
 import com.qrust.exceptions.LimitReached;
 import com.qrust.service.QRCodeService;
-import com.qrust.service.ScanService;
+import com.qrust.service.impl.ScanService;
 import io.quarkus.security.Authenticated;
 import io.vertx.ext.web.RoutingContext;
 import jakarta.annotation.security.PermitAll;

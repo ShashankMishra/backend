@@ -1,4 +1,4 @@
-package com.qrust.service;
+package com.qrust.service.impl;
 
 import com.cashfree.pg.ApiException;
 import com.cashfree.pg.ApiResponse;
@@ -11,6 +11,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.qrust.api.dto.PlanType;
 import com.qrust.domain.WebhookEventType;
+import com.qrust.service.UserService;
 import jakarta.annotation.PostConstruct;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;

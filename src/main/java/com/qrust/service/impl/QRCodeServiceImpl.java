@@ -1,4 +1,4 @@
-package com.qrust.service;
+package com.qrust.service.impl;
 
 import com.qrust.api.dto.*;
 import com.qrust.domain.QRCode;
@@ -7,6 +7,8 @@ import com.qrust.domain.User;
 import com.qrust.exceptions.LimitReached;
 import com.qrust.mapper.*;
 import com.qrust.repository.QRCodeRepository;
+import com.qrust.service.QRCodeService;
+import com.qrust.service.UserService;
 import io.quarkus.security.UnauthorizedException;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;

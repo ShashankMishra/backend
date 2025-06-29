@@ -1,4 +1,4 @@
-package com.qrust.service;
+package com.qrust.service.impl;
 
 import com.qrust.api.dto.LocationRequest;
 import com.qrust.client.IpWhoIsClient;
@@ -7,6 +7,8 @@ import com.qrust.domain.ScanHistory;
 import com.qrust.domain.ScanLocation;
 import com.qrust.exceptions.LimitReached;
 import com.qrust.repository.ScanRepository;
+import com.qrust.service.QRCodeService;
+import com.qrust.service.UserService;
 import io.quarkus.runtime.LaunchMode;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;

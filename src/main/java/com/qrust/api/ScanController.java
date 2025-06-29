@@ -4,7 +4,7 @@ import com.qrust.api.dto.LocationRequest;
 import com.qrust.domain.QRCode;
 import com.qrust.domain.ScanHistory;
 import com.qrust.service.QRCodeService;
-import com.qrust.service.ScanService;
+import com.qrust.service.impl.ScanService;
 import io.quarkus.security.Authenticated;
 import jakarta.annotation.security.PermitAll;
 import jakarta.inject.Inject;

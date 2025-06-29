@@ -2,7 +2,7 @@ package com.qrust.api;
 
 import com.cashfree.pg.model.OrderEntity;
 import com.qrust.api.dto.CreateOrderRequest;
-import com.qrust.service.PaymentService;
+import com.qrust.service.impl.PaymentService;
 import jakarta.annotation.security.PermitAll;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.*;

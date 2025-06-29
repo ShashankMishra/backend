@@ -1,4 +1,4 @@
-package com.qrust.service;
+package com.qrust.service.impl;
 
 import com.qrust.domain.User;
 import com.qrust.domain.UserRole;
@@ -25,7 +25,7 @@ public class UserLimitService {
     @ConfigProperty(name = "plan.business.scans.max-allowed", defaultValue = "1000")
     int businessScanLimit;
     @Inject
-    @ConfigProperty(name = "plan.premium.scans.max-allowed", defaultValue = "100")
+    @ConfigProperty(name = "plan.premium.scans.max-allowed", defaultValue = "200")
     int premiumScanLimit;
     @Inject
     @ConfigProperty(name = "plan.basic.scans.max-allowed", defaultValue = "10")

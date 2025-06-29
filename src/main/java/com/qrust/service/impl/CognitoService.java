@@ -1,4 +1,4 @@
-package com.qrust.service;
+package com.qrust.service.impl;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
