@@ -18,5 +18,7 @@ public interface QRCodeService {
 
     QRCodeResponse toResponse(QRCode entity);
     QRCodePublicResponse toPublicResponse(QRCode entity);
+
+    QRCode updateIsPublic(UUID id, boolean b);
 }
 

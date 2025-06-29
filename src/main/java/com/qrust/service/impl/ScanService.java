@@ -47,6 +47,9 @@ public class ScanService {
         if (qrCode == null) {
             throw new IllegalArgumentException("QR Code not found for ID: " + history.getQrId());
         }
+        if (!qrCode.isPublic()) {
+            throw new IllegalArgumentException("QR Code is made private by owner");
+        }
         List<ScanHistory> scanHistoryForQr = getScanHistoryForQr(history.getQrId());
         if (scanHistoryForQr.size() >= userLimitService.getScanLimitForUser(userService.getUserById(qrCode.getOwner().getUserId()))) {
             throw new LimitReached("Scan limit reached, Owner need to upgrade plan to allow more scans.");

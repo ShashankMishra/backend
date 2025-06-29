@@ -22,6 +22,7 @@ public class QRCode {
     private User owner;
     private User createdBy;
     private QRDetails details;
+    private boolean isPublic = true;
 
     @DynamoDbPartitionKey
     public UUID getId() {

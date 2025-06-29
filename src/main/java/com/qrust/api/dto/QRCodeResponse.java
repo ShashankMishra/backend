@@ -15,5 +15,5 @@ public class QRCodeResponse {
     private QRStatus status;
     private LocalDateTime createdAt;
     private QRDetails details;
+    private boolean isPublic;
 }
-

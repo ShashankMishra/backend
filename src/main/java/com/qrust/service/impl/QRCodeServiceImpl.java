@@ -12,6 +12,7 @@ import com.qrust.service.UserService;
 import io.quarkus.security.UnauthorizedException;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import org.jetbrains.annotations.Nullable;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -55,12 +56,8 @@ public class QRCodeServiceImpl implements QRCodeService {
     @Override
     public QRCode updateQr(UUID qrId, QRCodeRequest req) {
         // get qrcode from repo and then anyone can update QR if it is unassigned status otherwise only owner can update
-        User currentUser = userService.getCurrentUser();
-        QRCode qrCode = getQr(qrId);
+        QRCode qrCode = getQrAuthorisedCode(qrId);
         if (qrCode == null) return null;
-        if (qrCode.getOwner() == null || !qrCode.getOwner().getUserId().equals(currentUser.getUserId())) {
-            throw new UnauthorizedException("You do not have permission to update this QR code.");
-        }
         updateQrDetails(qrCode, req);
         qrCodeRepository.save(qrCode);
         return qrCode;
@@ -101,6 +98,7 @@ public class QRCodeServiceImpl implements QRCodeService {
         resp.setStatus(entity.getStatus());
         resp.setCreatedAt(entity.getCreatedAt());
         resp.setDetails(entity.getDetails());
+        resp.setPublic(entity.isPublic());
         return resp;
     }
 
@@ -132,5 +130,24 @@ public class QRCodeServiceImpl implements QRCodeService {
         resp.setType(entity.getType());
         resp.setDetails(entity.getDetails());
         return resp;
+    }
+
+    @Override
+    public QRCode updateIsPublic(UUID id, boolean isPublic) {
+        QRCode qrCode = getQrAuthorisedCode(id);
+        if (qrCode == null) return null;
+        qrCode.setPublic(isPublic);
+        qrCodeRepository.save(qrCode);
+        return qrCode;
+    }
+
+    private @Nullable QRCode getQrAuthorisedCode(UUID id) {
+        User currentUser = userService.getCurrentUser();
+        QRCode qrCode = getQr(id);
+        if (qrCode == null) return null;
+        if (qrCode.getOwner() == null || !qrCode.getOwner().getUserId().equals(currentUser.getUserId())) {
+            throw new UnauthorizedException("You do not have permission to update this QR code.");
+        }
+        return qrCode;
     }
 }

@@ -91,9 +91,7 @@ public class QRCodeController {
         UriBuilder.fromUri(frontendUri).build();
         URI redirectUrl;
         try {
-
             ScanHistory scanHistory = createScanHistory(qrId, headers, rc);
-
             redirectUrl = UriBuilder.fromUri(frontendUri)
                     .path("scans")
                     .path(scanHistory.getScanId().toString())
@@ -134,6 +132,24 @@ public class QRCodeController {
             scanHistory = scanHistory.subList(0, 200);
         }
         return Response.ok(scanHistory).build();
+    }
+
+    @PUT
+    @Path("/{id}/public")
+    @Authenticated
+    public Response setPublic(@PathParam("id") UUID id) {
+        QRCode qrCode = qrCodeService.updateIsPublic(id, true);
+        if (qrCode == null) return Response.status(Response.Status.NOT_FOUND).build();
+        return Response.ok(qrCodeService.toResponse(qrCode)).build();
+    }
+
+    @PUT
+    @Path("/{id}/private")
+    @Authenticated
+    public Response setPrivate(@PathParam("id") UUID id) {
+        QRCode qrCode = qrCodeService.updateIsPublic(id, false);
+        if (qrCode == null) return Response.status(Response.Status.NOT_FOUND).build();
+        return Response.ok(qrCodeService.toResponse(qrCode)).build();
     }
 
     private ScanHistory createScanHistory(UUID qrId, HttpHeaders headers, RoutingContext rc) {
