@@ -130,8 +130,8 @@ public class QRCodeController {
         List<ScanHistory> scanHistory = scanService.getScanHistoryForQr(qrId);
         // sort scan history by scan timestamp in descending order and just send latest 20
         scanHistory.sort((s1, s2) -> s2.getScanTimestamp().compareTo(s1.getScanTimestamp()));
-        if (scanHistory.size() > 10) {
-            scanHistory = scanHistory.subList(0, 10);
+        if (scanHistory.size() > 200) {
+            scanHistory = scanHistory.subList(0, 200);
         }
         return Response.ok(scanHistory).build();
     }
