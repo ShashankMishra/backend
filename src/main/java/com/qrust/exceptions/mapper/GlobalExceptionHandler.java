@@ -1,4 +1,4 @@
-package com.qrust.exceptions;
+package com.qrust.exceptions.mapper;
 
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.ext.ExceptionMapper;
@@ -12,11 +12,6 @@ public class GlobalExceptionHandler implements ExceptionMapper<Exception> {
     @Override
     public Response toResponse(Exception exception) {
         LOG.error("Unhandled exception caught", exception);
-        if (exception instanceof LimitReached) {
-            return Response.status(Response.Status.BAD_REQUEST)
-                    .entity(exception.getMessage())
-                    .build();
-        }
         return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
                 .entity("An unexpected error occurred. Please try again later.")
                 .build();

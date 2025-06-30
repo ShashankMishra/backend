@@ -5,7 +5,7 @@ import com.qrust.client.IpWhoIsClient;
 import com.qrust.domain.QRCode;
 import com.qrust.domain.ScanHistory;
 import com.qrust.domain.ScanLocation;
-import com.qrust.exceptions.LimitReached;
+import com.qrust.exceptions.LimitReachedException;
 import com.qrust.repository.ScanRepository;
 import com.qrust.service.QRCodeService;
 import com.qrust.service.UserService;
@@ -52,7 +52,7 @@ public class ScanService {
         }
         List<ScanHistory> scanHistoryForQr = getScanHistoryForQr(history.getQrId());
         if (scanHistoryForQr.size() >= userLimitService.getScanLimitForUser(userService.getUserById(qrCode.getOwner().getUserId()))) {
-            throw new LimitReached("Scan limit reached, Owner need to upgrade plan to allow more scans.");
+            throw new LimitReachedException("Scan limit reached, Owner need to upgrade plan to allow more scans.");
         }
         // if scan history already exists based on ip address and qrId within last 1 min then return existing history
         ScanHistory finalHistory = history;
