@@ -24,6 +24,7 @@ public class ScanHistory {
     private String scannerIp;
     private String deviceInfo;
     private ScanLocation location;
+    private long expiry;
 
     @DynamoDbPartitionKey
     public UUID getScanId() {
