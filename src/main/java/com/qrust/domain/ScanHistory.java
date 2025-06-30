@@ -9,6 +9,7 @@ import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbSecon
 import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbSecondarySortKey;
 
 import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.UUID;
 
 @DynamoDbBean
@@ -43,5 +44,10 @@ public class ScanHistory {
     @DynamoDbSecondarySortKey(indexNames = {"qrId-index"})
     public Instant getScanTimestamp() {
         return scanTimestamp;
+    }
+
+    public long getExpiry() {
+        if (scanTimestamp == null) return 0L;
+        return scanTimestamp.plus(5, ChronoUnit.MINUTES).getEpochSecond();
     }
 }
