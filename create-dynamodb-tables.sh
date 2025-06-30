@@ -44,6 +44,25 @@ aws dynamodb create-table \
   --endpoint-url $ENDPOINT_URL \
   --region $REGION || true
 
+# Create paymentOrder table with merchantOrderId as HASH key and GSI on userId
+aws dynamodb create-table \
+  --table-name paymentOrder \
+  --attribute-definitions AttributeName=merchantOrderId,AttributeType=S AttributeName=userId,AttributeType=S \
+  --key-schema AttributeName=merchantOrderId,KeyType=HASH \
+  --global-secondary-indexes '[
+    {
+      "IndexName": "userId-index",
+      "KeySchema": [
+        {"AttributeName":"userId","KeyType":"HASH"}
+      ],
+      "Projection":{"ProjectionType":"ALL"},
+      "ProvisionedThroughput":{"ReadCapacityUnits":5,"WriteCapacityUnits":5}
+    }
+  ]' \
+  --provisioned-throughput ReadCapacityUnits=5,WriteCapacityUnits=5 \
+  --endpoint-url $ENDPOINT_URL \
+  --region $REGION || true
+
 echo "Tables created in local DynamoDB."
 
 echo "Tables created in local DynamoDB."

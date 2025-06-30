@@ -17,14 +17,15 @@ public class UserResource {
     @Inject
     CognitoService cognitoService;
 
-    @POST
-    @Path("/upgrade")
-    @Authenticated() // Only normal users can upgrade
-    public Response upgradeToPremium(@Context SecurityContext securityContext) {
-        String username = securityContext.getUserPrincipal().getName();
-        cognitoService.upgradeUserToPremium(username);
-        return Response.ok().entity("User upgraded to premium").build();
-    }
+    //TODO: this method is only for testing purposes, remove it later
+//    @POST
+//    @Path("/upgrade/{group}")
+//    @Authenticated() // Only normal users can upgrade
+//    public Response upgradeUserGroup(@Context SecurityContext securityContext, @PathParam("group") String group) {
+//        String username = securityContext.getUserPrincipal().getName();
+//        cognitoService.upgradeUserGroup(username, group);
+//        return Response.ok().entity("User group upgraded").build();
+//    }
 
     @GET
     @Path("/is-premium")
@@ -35,13 +36,13 @@ public class UserResource {
     }
 
     //TODO: this method is only for testing purposes, remove it later
-    @POST
-    @Path("/downgrade/{group}")
-    @Authenticated()
-    public Response downgradeUser(@Context SecurityContext securityContext, @PathParam("group") String group) {
-        String username = securityContext.getUserPrincipal().getName();
-        cognitoService.downgradeUser(username, group);
-        return Response.ok().entity("User downgraded").build();
-    }
+//    @POST
+//    @Path("/downgrade/{group}")
+//    @Authenticated()
+//    public Response downgradeUser(@Context SecurityContext securityContext, @PathParam("group") String group) {
+//        String username = securityContext.getUserPrincipal().getName();
+//        cognitoService.downgradeUser(username, group);
+//        return Response.ok().entity("User downgraded").build();
+//    }
 }
 

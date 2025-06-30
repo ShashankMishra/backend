@@ -6,6 +6,9 @@ plugins {
 repositories {
     mavenCentral()
     mavenLocal()
+    maven {
+        url "https://phonepe.mycloudrepo.io/public/repositories/phonepe-pg-sdk-java"
+    }
 }
 
 dependencies {
@@ -31,6 +34,8 @@ dependencies {
     implementation 'software.amazon.awssdk:cognitoidentityprovider:2.25.61'
     implementation 'com.cashfree.pg.java:cashfree_pg:5.0.1'
     implementation 'com.squareup.okhttp3:okhttp:4.12.0'
+    implementation 'com.phonepe:pg-sdk-java:2.1.4'
+    implementation 'io.quarkus:quarkus-scheduler'
     annotationProcessor 'org.projectlombok:lombok:1.18.32'
 
     testImplementation 'io.quarkus:quarkus-junit5'

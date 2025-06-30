@@ -22,7 +22,7 @@ import java.util.EnumMap;
 import java.util.Objects;
 
 @ApplicationScoped
-public class PaymentService {
+public class CashfreePaymentService {
 
     @ConfigProperty(name = "cashfree.client-id")
     String clientId;
@@ -98,7 +98,7 @@ public class PaymentService {
             JsonNode root = mapper.readTree(body);
             String eventType = root.has("type") ? root.get("type").asText() : null;
             if (Objects.equals(eventType, WebhookEventType.PAYMENT_SUCCESS_WEBHOOK.name())) {
-                cognitoService.upgradeUserToPremium(userId);
+                cognitoService.upgradeUserGroup(userId, "basic");
             }
         } catch (Exception e) {
             throw new RuntimeException(e);

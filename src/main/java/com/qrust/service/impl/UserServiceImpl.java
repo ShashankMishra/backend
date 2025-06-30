@@ -64,4 +64,24 @@ public class UserServiceImpl implements UserService {
             return new User(userId, UserRole.FREE);
         }
     }
+
+    @Override
+    public boolean isUserInGroup(String userId, String group) {
+        try (CognitoIdentityProviderClient cognitoClient = CognitoIdentityProviderClient.builder()
+                .region(region)
+                .credentialsProvider(DefaultCredentialsProvider.create())
+                .build()) {
+
+            AdminListGroupsForUserRequest request = AdminListGroupsForUserRequest.builder()
+                    .username(userId)
+                    .userPoolId(userPoolId)
+                    .build();
+            AdminListGroupsForUserResponse response = cognitoClient.adminListGroupsForUser(request);
+            return response.groups().stream()
+                    .anyMatch(g -> g.groupName().equalsIgnoreCase(group));
+        } catch (CognitoIdentityProviderException e) {
+            log.error("Error checking user '{}' group '{}' in Cognito: {}", userId, group, e.awsErrorDetails().errorMessage());
+            return false;
+        }
+    }
 }
