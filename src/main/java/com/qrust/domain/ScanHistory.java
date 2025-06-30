@@ -49,6 +49,6 @@ public class ScanHistory {
 
     public long getExpiry() {
         if (scanTimestamp == null) return 0L;
-        return scanTimestamp.plus(5, ChronoUnit.MINUTES).getEpochSecond();
+        return scanTimestamp.plus(30, ChronoUnit.DAYS).getEpochSecond();
     }
 }
