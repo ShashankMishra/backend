@@ -60,10 +60,9 @@ public class PhonepePaymentService {
     private static final EnumMap<PlanType, Long> PLAN_PRICES = new EnumMap<>(PlanType.class);
 
     static {
-        PLAN_PRICES.put(PlanType.BASIC, 1L);
-        PLAN_PRICES.put(PlanType.PREMIUM, 1L);
-        PLAN_PRICES.put(PlanType.BUSINESS, 1L);
-        PLAN_PRICES.put(PlanType.FREE, 1L);
+        PLAN_PRICES.put(PlanType.BASIC, 249L);
+        PLAN_PRICES.put(PlanType.PREMIUM, 100000L);
+        PLAN_PRICES.put(PlanType.BUSINESS, 100000L);
     }
 
     @PostConstruct
@@ -78,7 +77,7 @@ public class PhonepePaymentService {
         saveOrderToRepository(merchantOrderId, planType);
 
         // Set order amount based on plan type using PLAN_PRICES map
-        Long amount = PLAN_PRICES.get(planType);
+        Long amount = PLAN_PRICES.get(planType) * 100;
         if (amount == null) {
             throw new IllegalArgumentException("Unsupported plan type: " + planType);
         }
