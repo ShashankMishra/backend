@@ -138,7 +138,7 @@ public class PhonepePaymentService {
         paymentOrder.setMerchantOrderId(merchantOrderId);
         paymentOrder.setPlanType(planType);
         paymentOrder.setUserId(userService.getCurrentUser().getUserId());
+        paymentOrder.setCreatedAt(java.time.LocalDateTime.now());
         paymentOrderRepository.save(paymentOrder);
     }
 }
-

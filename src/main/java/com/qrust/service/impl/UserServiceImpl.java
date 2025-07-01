@@ -16,6 +16,10 @@ import software.amazon.awssdk.services.cognitoidentityprovider.model.AdminListGr
 import software.amazon.awssdk.services.cognitoidentityprovider.model.AdminListGroupsForUserResponse;
 import software.amazon.awssdk.services.cognitoidentityprovider.model.CognitoIdentityProviderException;
 
+import com.qrust.domain.PaymentOrder;
+import com.qrust.repository.PaymentOrderRepository;
+import java.util.List;
+
 import static com.qrust.domain.UserRole.FREE;
 import static software.amazon.awssdk.regions.Region.AP_SOUTH_1;
 
@@ -30,6 +34,9 @@ public class UserServiceImpl implements UserService {
     String userPoolId;
 
     private final Region region = AP_SOUTH_1;
+
+    @Inject
+    PaymentOrderRepository paymentOrderRepository;
 
     @Override
     public User getCurrentUser() {
@@ -83,5 +90,11 @@ public class UserServiceImpl implements UserService {
             log.error("Error checking user '{}' group '{}' in Cognito: {}", userId, group, e.awsErrorDetails().errorMessage());
             return false;
         }
+    }
+
+    @Override
+    public List<PaymentOrder> getOrdersForCurrentUser() {
+        String userId = getCurrentUser().getUserId();
+        return paymentOrderRepository.getAllByUserId(userId);
     }
 }
