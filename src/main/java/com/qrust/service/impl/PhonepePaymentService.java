@@ -40,8 +40,8 @@ public class PhonepePaymentService {
     @ConfigProperty(name = "phonepe-webhook.password")
     String webhookPassword;
 
-    Integer clientVersion = 1;  //insert your client version here
-    Env env = Env.SANDBOX;      //change to Env.PRODUCTION when you go live
+    Integer clientVersion = 1;
+    Env env = Env.PRODUCTION;
 
     @ConfigProperty(name = "quarkus.frontend.uri")
     String frontendUri;
