@@ -1,6 +1,6 @@
 package com.qrust.user.service;
 
-import com.qrust.common.domain.PaymentOrder;
+import com.qrust.common.domain.order.PaymentOrder;
 import com.qrust.common.domain.User;
 import com.qrust.common.domain.UserRole;
 import com.qrust.common.repository.OrderRepository;

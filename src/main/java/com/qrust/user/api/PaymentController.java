@@ -2,7 +2,7 @@ package com.qrust.user.api;
 
 import com.phonepe.sdk.pg.common.models.response.OrderStatusResponse;
 import com.phonepe.sdk.pg.payments.v2.models.response.StandardCheckoutPayResponse;
-import com.qrust.user.api.dto.CreateOrderRequest;
+import com.qrust.user.api.dto.order.CreateOrderRequest;
 import com.qrust.user.service.PhonepePaymentService;
 import io.quarkus.logging.Log;
 import jakarta.annotation.security.PermitAll;
@@ -32,7 +32,11 @@ public class PaymentController {
     @POST
     @Path("/create-order")
     public Response createOrder(CreateOrderRequest requestDto) {
-        StandardCheckoutPayResponse checkoutPayResponse = phonepePaymentService.createOrder(requestDto.getPlanType());
+        if (requestDto.getOrderItems() == null || requestDto.getOrderItems().isEmpty()) {
+            return Response.status(Response.Status.BAD_REQUEST).entity("Order items cannot be empty").build();
+        }
+
+        StandardCheckoutPayResponse checkoutPayResponse = phonepePaymentService.createOrder(requestDto.getOrderItems());
         return Response.ok(checkoutPayResponse).build();
     }
 

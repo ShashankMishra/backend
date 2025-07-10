@@ -44,16 +44,35 @@ aws dynamodb create-table \
   --endpoint-url $ENDPOINT_URL \
   --region $REGION || true
 
-# Create paymentOrder table with merchantOrderId as HASH key and GSI on userId
+# Create paymentOrder table with merchantOrderId as HASH key, orderItemId as RANGE key, and GSIs
 aws dynamodb create-table \
   --table-name paymentOrder \
-  --attribute-definitions AttributeName=merchantOrderId,AttributeType=S AttributeName=userId,AttributeType=S \
-  --key-schema AttributeName=merchantOrderId,KeyType=HASH \
+  --attribute-definitions AttributeName=merchantOrderId,AttributeType=S AttributeName=orderItemId,AttributeType=S AttributeName=userId,AttributeType=S AttributeName=paymentStatus,AttributeType=S AttributeName=orderStatus,AttributeType=S AttributeName=createdAt,AttributeType=S \
+  --key-schema AttributeName=merchantOrderId,KeyType=HASH AttributeName=orderItemId,KeyType=RANGE \
   --global-secondary-indexes '[
     {
-      "IndexName": "userId-index",
+      "IndexName": "GSI_UserOrders",
       "KeySchema": [
-        {"AttributeName":"userId","KeyType":"HASH"}
+        {"AttributeName":"userId","KeyType":"HASH"},
+        {"AttributeName":"createdAt","KeyType":"RANGE"}
+      ],
+      "Projection":{"ProjectionType":"ALL"},
+      "ProvisionedThroughput":{"ReadCapacityUnits":5,"WriteCapacityUnits":5}
+    },
+    {
+      "IndexName": "GSI_PaymentStatus",
+      "KeySchema": [
+        {"AttributeName":"paymentStatus","KeyType":"HASH"},
+        {"AttributeName":"createdAt","KeyType":"RANGE"}
+      ],
+      "Projection":{"ProjectionType":"ALL"},
+      "ProvisionedThroughput":{"ReadCapacityUnits":5,"WriteCapacityUnits":5}
+    },
+    {
+      "IndexName": "GSI_OrderStatus",
+      "KeySchema": [
+        {"AttributeName":"orderStatus","KeyType":"HASH"},
+        {"AttributeName":"createdAt","KeyType":"RANGE"}
       ],
       "Projection":{"ProjectionType":"ALL"},
       "ProvisionedThroughput":{"ReadCapacityUnits":5,"WriteCapacityUnits":5}
@@ -62,7 +81,5 @@ aws dynamodb create-table \
   --provisioned-throughput ReadCapacityUnits=5,WriteCapacityUnits=5 \
   --endpoint-url $ENDPOINT_URL \
   --region $REGION || true
-
-echo "Tables created in local DynamoDB."
 
 echo "Tables created in local DynamoDB."

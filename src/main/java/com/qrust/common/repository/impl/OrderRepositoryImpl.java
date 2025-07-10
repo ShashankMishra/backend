@@ -1,11 +1,15 @@
 package com.qrust.common.repository.impl;
 
-import com.qrust.common.domain.OrderStatus;
-import com.qrust.common.domain.PaymentOrder;
+import com.qrust.common.domain.order.OrderStatus;
+import com.qrust.common.domain.order.PaymentOrder;
+import com.qrust.common.domain.order.PaymentStatus;
 import com.qrust.common.repository.OrderRepository;
 import jakarta.enterprise.context.ApplicationScoped;
 import lombok.extern.slf4j.Slf4j;
-import software.amazon.awssdk.enhanced.dynamodb.*;
+import software.amazon.awssdk.enhanced.dynamodb.DynamoDbEnhancedClient;
+import software.amazon.awssdk.enhanced.dynamodb.DynamoDbIndex;
+import software.amazon.awssdk.enhanced.dynamodb.DynamoDbTable;
+import software.amazon.awssdk.enhanced.dynamodb.TableSchema;
 import software.amazon.awssdk.enhanced.dynamodb.model.QueryConditional;
 
 import java.util.ArrayList;
@@ -17,10 +21,14 @@ public class OrderRepositoryImpl implements OrderRepository {
 
     private final DynamoDbTable<PaymentOrder> paymentOrderTable;
     private final DynamoDbIndex<PaymentOrder> userIdIndex;
+    private final DynamoDbIndex<PaymentOrder> paymentStatusIndex;
+    private final DynamoDbIndex<PaymentOrder> orderStatusIndex;
 
     public OrderRepositoryImpl(DynamoDbEnhancedClient enhancedClient) {
         this.paymentOrderTable = enhancedClient.table("paymentOrder", TableSchema.fromBean(PaymentOrder.class));
-        this.userIdIndex = paymentOrderTable.index("userId-index");
+        this.userIdIndex = paymentOrderTable.index("GSI_UserOrders");
+        this.paymentStatusIndex = paymentOrderTable.index("GSI_PaymentStatus");
+        this.orderStatusIndex = paymentOrderTable.index("GSI_OrderStatus");
     }
 
     @Override
@@ -36,9 +44,15 @@ public class OrderRepositoryImpl implements OrderRepository {
     }
 
     @Override
-    public PaymentOrder getByMerchantOrderId(String merchantOrderId) {
-        Key key = Key.builder().partitionValue(merchantOrderId).build();
-        return paymentOrderTable.getItem(key);
+    public List<PaymentOrder> getAllByMerchantOrderId(String merchantOrderId) {
+        List<PaymentOrder> orders = new ArrayList<>();
+
+        paymentOrderTable
+                .query(r -> r.queryConditional(QueryConditional.keyEqualTo(k -> k.partitionValue(merchantOrderId))))
+                .stream()
+                .forEach(page -> orders.addAll(page.items()));
+
+        return orders;
     }
 
     @Override
@@ -47,13 +61,36 @@ public class OrderRepositoryImpl implements OrderRepository {
     }
 
     @Override
-    public List<PaymentOrder> getAllByOrderStatus(OrderStatus status) {
+    public List<PaymentOrder> getAllByPaymentStatus(PaymentStatus status) {
         List<PaymentOrder> orders = new ArrayList<>();
-        paymentOrderTable.scan().items().forEach(order -> {
-            if (order.getOrderStatus() == status) {
-                orders.add(order);
-            }
-        });
+
+        paymentStatusIndex
+                .query(r -> r.queryConditional(QueryConditional.keyEqualTo(k -> k.partitionValue(status.name()))))
+                .stream()
+                .forEach(page -> orders.addAll(page.items()));
+
         return orders;
+    }
+
+    @Override
+    public List<PaymentOrder> getAllQrStickerOrders(OrderStatus orderStatus) {
+        List<PaymentOrder> orders = new ArrayList<>();
+
+        orderStatusIndex
+                .query(r -> r.queryConditional(QueryConditional.keyEqualTo(k -> k.partitionValue(orderStatus.name()))))
+                .stream()
+                .forEach(page -> orders.addAll(page.items()));
+
+        return orders;
+    }
+
+    @Override
+    public PaymentOrder getByOrderItemId(String orderItemId) {
+        return paymentOrderTable.scan()
+                .items()
+                .stream()
+                .filter(order -> orderItemId.equals(order.getOrderItemId()))
+                .findFirst()
+                .get();
     }
 }

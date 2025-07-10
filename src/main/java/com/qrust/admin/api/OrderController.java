@@ -1,12 +1,10 @@
 package com.qrust.admin.api;
 
+import com.qrust.admin.api.dto.OrderShippingRequest;
 import com.qrust.admin.service.OrderService;
 import jakarta.annotation.security.RolesAllowed;
 import jakarta.inject.Inject;
-import jakarta.ws.rs.Consumes;
-import jakarta.ws.rs.GET;
-import jakarta.ws.rs.Path;
-import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import lombok.extern.slf4j.Slf4j;
@@ -27,5 +25,21 @@ public class OrderController {
     @RolesAllowed("admin")
     public Response getOrdersForCurrentUser() {
         return Response.ok(orderService.getRecentOrders()).build();
+    }
+
+
+    @GET
+    @Path("/qr-sticker-orders")
+    @RolesAllowed("admin")
+    public Response getAllQrStickerOrders() {
+        return Response.ok(orderService.getAllQrStickerOrders()).build();
+    }
+
+    @POST
+    @Path("/order-shipping-details")
+    @RolesAllowed("admin")
+    public Response updateOrderShippingDetails(OrderShippingRequest orderShippingRequest) {
+        orderService.updateOrderShippingDetails(orderShippingRequest);
+        return Response.ok().build();
     }
 }
