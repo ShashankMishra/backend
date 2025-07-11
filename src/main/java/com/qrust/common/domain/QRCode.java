@@ -16,13 +16,15 @@ import java.util.UUID;
 @AllArgsConstructor
 public class QRCode {
     private UUID id;
-    private QRStatus status = QRStatus.ASSIGNED;
+    private String shortId;
+    private QRStatus status = QRStatus.ACTIVE;
     private LocalDateTime createdAt;
     private QRType type;
     private User owner;
     private User createdBy;
     private QRDetails details;
     private boolean isPublic = true;
+    private Contact assignedOwnerContact;
 
     @DynamoDbPartitionKey
     public UUID getId() {

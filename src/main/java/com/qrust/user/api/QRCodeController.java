@@ -22,6 +22,9 @@ import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 
+import static com.qrust.common.domain.QRStatus.ACTIVE;
+import static com.qrust.common.domain.QRStatus.ASSIGNED;
+
 @Path("/qr-codes")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
@@ -41,7 +44,7 @@ public class QRCodeController {
     @POST
     @Authenticated
     public Response create(@Valid QRCodeRequest request) throws LimitReachedException {
-        QRCode qrCode = qrCodeService.createQr(request);
+        QRCode qrCode = qrCodeService.createUserQr(request);
         return Response.status(Response.Status.CREATED).entity(qrCodeService.toResponse(qrCode)).build();
     }
 
@@ -50,6 +53,7 @@ public class QRCodeController {
     public List<QRCodeResponse> getAll() {
         List<QRCode> allQrs = qrCodeService.getAllQrs();
         List<QRCodeResponse> response = allQrs.stream()
+                .filter(qrCode -> qrCode.getStatus() == ACTIVE) // Exclude deleted QRs
                 .map(qrCodeService::toResponse)
                 .toList();
         return response;

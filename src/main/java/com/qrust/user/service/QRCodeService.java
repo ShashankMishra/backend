@@ -1,5 +1,6 @@
 package com.qrust.user.service;
 
+import com.qrust.common.ShortNumericIdGenerator;
 import com.qrust.common.domain.QRCode;
 import com.qrust.common.domain.QRStatus;
 import com.qrust.common.domain.User;
@@ -8,6 +9,7 @@ import com.qrust.common.repository.QRCodeRepository;
 import com.qrust.user.api.dto.*;
 import com.qrust.user.exceptions.LimitReachedException;
 import io.quarkus.security.UnauthorizedException;
+import jakarta.annotation.security.RolesAllowed;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import org.jetbrains.annotations.Nullable;
@@ -17,7 +19,7 @@ import java.util.List;
 import java.util.UUID;
 
 @ApplicationScoped
-public class QRCodeService{
+public class QRCodeService {
     @Inject
     QRCodeRepository qrCodeRepository;
 
@@ -36,17 +38,19 @@ public class QRCodeService{
     private final LockscreenDetailsMapper lockscreenDetailsMapper = new LockscreenDetailsMapper();
 
 
-    public QRCode createQr(QRCodeRequest req) throws LimitReachedException {
+    public QRCode createUserQr(QRCodeRequest req) throws LimitReachedException {
         if (getAllQrs().size() >= userLimitService.getQrLimitForUser(userService.getCurrentUser())) {
             throw new LimitReachedException("QR code limit reached, Please upgrade your plan to create more QR's.");
         }
         QRCode entity = toEntity(req);
         entity.setId(UUID.randomUUID());
+        entity.setShortId(ShortNumericIdGenerator.generate());
         entity.setCreatedAt(LocalDateTime.now());
         User currentUser = userService.getCurrentUser();
         entity.setOwner(currentUser);
-        entity.setStatus(QRStatus.ASSIGNED);
+        entity.setStatus(QRStatus.ACTIVE);
         entity.setCreatedBy(currentUser);
+
         qrCodeRepository.save(entity);
         return entity;
     }
@@ -60,6 +64,8 @@ public class QRCodeService{
         qrCodeRepository.save(qrCode);
         return qrCode;
     }
+
+
 
 
     public void deleteQr(UUID qrId) {
@@ -139,6 +145,21 @@ public class QRCodeService{
         return qrCode;
     }
 
+    @RolesAllowed("admin")
+    public QRCode createQrForAdmin(QRCodeRequest req) throws LimitReachedException {
+        QRCode entity = toEntity(req);
+        entity.setId(UUID.randomUUID());
+        entity.setShortId(ShortNumericIdGenerator.generate());
+        entity.setCreatedAt(LocalDateTime.now());
+        User currentUser = userService.getCurrentUser();
+        entity.setOwner(currentUser);
+        entity.setStatus(QRStatus.UNASSIGNED);
+        entity.setCreatedBy(currentUser);
+
+        qrCodeRepository.save(entity);
+        return entity;
+    }
+
     private @Nullable QRCode getQrAuthorisedCode(UUID id) {
         User currentUser = userService.getCurrentUser();
         QRCode qrCode = getQr(id);
@@ -148,4 +169,6 @@ public class QRCodeService{
         }
         return qrCode;
     }
+
+
 }

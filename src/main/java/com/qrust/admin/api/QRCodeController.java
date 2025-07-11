@@ -1,10 +1,14 @@
 package com.qrust.admin.api;
 
+import com.qrust.admin.api.dto.BulkQrCodeRequest;
 import com.qrust.common.domain.QRCode;
-import com.qrust.user.api.dto.QRCodeResponse;
+import com.qrust.common.domain.QRType;
+import com.qrust.user.api.dto.*;
+import com.qrust.user.exceptions.LimitReachedException;
 import com.qrust.user.service.QRCodeService;
 import jakarta.annotation.security.RolesAllowed;
 import jakarta.inject.Inject;
+import jakarta.validation.Valid;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
@@ -39,5 +43,79 @@ public class QRCodeController {
         if (qrCode == null) return Response.status(Response.Status.NOT_FOUND).build();
         return Response.ok(qrCodeService.toResponse(qrCode)).build();
     }
+
+    @POST
+    @RolesAllowed("admin")
+    public Response create(@Valid BulkQrCodeRequest request) throws LimitReachedException {
+
+        QRType type = request.getType();
+        int count = request.getCount();
+        QRCodeRequest qrCodeRequest = createDummyRequest(type);
+
+        while (count-- > 0) {
+            qrCodeService.createQrForAdmin(qrCodeRequest);
+        }
+        return Response.status(Response.Status.CREATED)
+                .entity("Bulk QR codes created successfully")
+                .build();
+    }
+
+    private QRCodeRequest createDummyRequest(QRType type) {
+        switch (type) {
+            case QRType.VEHICLE:
+                return new QRCodeRequest(type, dummyVehicleDetails());
+            case QRType.PERSON:
+                return new QRCodeRequest(type, dummyPersonDetails());
+            case CHILD:
+                return new QRCodeRequest(type, dummyChildDetails());
+            case LUGGAGE:
+                return new QRCodeRequest(type, dummyLuggageDetails());
+            default:
+                return null;
+
+        }
+
+    }
+
+    private QRDetailsDto dummyLuggageDetails() {
+        LuggageDetailsDto luggageDetailsDto = new LuggageDetailsDto();
+        luggageDetailsDto.setDescription("Sample Luggage");
+        luggageDetailsDto.setOwnerContact(dummyContact());
+        luggageDetailsDto.setEmergencyContact(dummyContact());
+        return luggageDetailsDto;
+    }
+
+    private QRDetailsDto dummyChildDetails() {
+        ChildDetailsDto childDetailsDto = new ChildDetailsDto();
+        childDetailsDto.setFullName("Sample Child");
+        childDetailsDto.setSchoolName("Some");
+        childDetailsDto.setSchoolContact(dummyContact());
+        childDetailsDto.setEmergencyContact(dummyContact());
+        return childDetailsDto;
+    }
+
+    private QRDetailsDto dummyPersonDetails() {
+        PersonDetailsDto personDetailsDto = new PersonDetailsDto();
+        personDetailsDto.setFullName("Sample Person");
+        personDetailsDto.setEmergencyContact(dummyContact());
+        return personDetailsDto;
+    }
+
+    private QRDetailsDto dummyVehicleDetails() {
+        VehicleDetailsDto vehicleDetailsDto = new VehicleDetailsDto();
+        vehicleDetailsDto.setNumberPlate("ABC-1234");
+        vehicleDetailsDto.setModelDescription("Car");
+        vehicleDetailsDto.setOwnerContact(dummyContact());
+        vehicleDetailsDto.setEmergencyContact(dummyContact());
+        return vehicleDetailsDto;
+    }
+
+    private ContactDto dummyContact() {
+        ContactDto contactDto = new ContactDto();
+        contactDto.setName("John Doe");
+        contactDto.setPhoneNumber("1234567890");
+        return contactDto;
+    }
+
 
 }

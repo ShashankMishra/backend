@@ -2,6 +2,7 @@ package com.qrust.user.service;
 
 import com.qrust.common.client.IpWhoIsClient;
 import com.qrust.common.domain.QRCode;
+import com.qrust.common.domain.QRStatus;
 import com.qrust.common.domain.ScanHistory;
 import com.qrust.common.domain.ScanLocation;
 import com.qrust.common.repository.ScanRepository;
@@ -48,8 +49,11 @@ public class ScanService {
         if (!qrCode.isPublic()) {
             throw new IllegalArgumentException("QR Code is made private by owner");
         }
+        if (qrCode.getStatus() == QRStatus.UNASSIGNED) {
+            throw new IllegalArgumentException("QR Code is valid but not assigned yet, please check with seller/agent or contact our support.");
+        }
         List<ScanHistory> scanHistoryForQr = getScanHistoryForQr(history.getQrId());
-        if (scanHistoryForQr.size() >= userLimitService.getScanLimitForUser(userService.getUserById(qrCode.getOwner().getUserId()))) {
+        if (checkScanLimit(scanHistoryForQr, qrCode)) {
             throw new LimitReachedException("Scan limit reached, Owner need to upgrade plan to allow more scans.");
         }
         // if scan history already exists based on ip address and qrId within last 1 min then return existing history
@@ -65,6 +69,10 @@ public class ScanService {
         }
         saveWithLocation(history);
         return history;
+    }
+
+    private boolean checkScanLimit(List<ScanHistory> scanHistoryForQr, QRCode qrCode) {
+        return qrCode.getStatus() == QRStatus.ACTIVE  && scanHistoryForQr.size() >= userLimitService.getScanLimitForUser(userService.getUserById(qrCode.getOwner().getUserId()));
     }
 
     private void saveWithLocation(ScanHistory history) {
