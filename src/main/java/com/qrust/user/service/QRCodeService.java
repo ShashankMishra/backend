@@ -82,6 +82,8 @@ public class QRCodeService {
 
     public List<QRCode> getAllQrs() {
         User currentUser = userService.getCurrentUser();
+
+        // TODO: only get owned QRs
         return qrCodeRepository.findAll().stream()
                 .filter(qr -> qr.getOwner() != null && qr.getOwner().getUserId().equals(currentUser.getUserId()))
                 .toList();

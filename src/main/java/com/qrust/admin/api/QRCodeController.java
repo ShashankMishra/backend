@@ -29,6 +29,8 @@ public class QRCodeController {
     @RolesAllowed("admin")
     public List<QRCodeResponse> getAll() {
         List<QRCode> allQrs = qrCodeService.getAllQrs();
+
+
         List<QRCodeResponse> response = allQrs.stream()
                 .map(qrCodeService::toResponse)
                 .toList();

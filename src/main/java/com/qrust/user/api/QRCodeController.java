@@ -2,9 +2,11 @@ package com.qrust.user.api;
 
 import com.qrust.common.domain.QRCode;
 import com.qrust.common.domain.ScanHistory;
+import com.qrust.user.api.dto.ClaimRequest;
 import com.qrust.user.api.dto.QRCodeRequest;
 import com.qrust.user.api.dto.QRCodeResponse;
 import com.qrust.user.exceptions.LimitReachedException;
+import com.qrust.user.service.ClaimService;
 import com.qrust.user.service.QRCodeService;
 import com.qrust.user.service.ScanService;
 import io.quarkus.security.Authenticated;
@@ -23,7 +25,6 @@ import java.util.List;
 import java.util.UUID;
 
 import static com.qrust.common.domain.QRStatus.ACTIVE;
-import static com.qrust.common.domain.QRStatus.ASSIGNED;
 
 @Path("/qr-codes")
 @Produces(MediaType.APPLICATION_JSON)
@@ -35,6 +36,9 @@ public class QRCodeController {
 
     @Inject
     ScanService scanService;
+
+    @Inject
+    ClaimService claimService;
 
 
     @ConfigProperty(name = "app.frontend.uri")
@@ -154,6 +158,14 @@ public class QRCodeController {
         QRCode qrCode = qrCodeService.updateIsPublic(id, false);
         if (qrCode == null) return Response.status(Response.Status.NOT_FOUND).build();
         return Response.ok(qrCodeService.toResponse(qrCode)).build();
+    }
+
+
+    @POST
+    @Path("/{id}/claim")
+    public Response verifyClaim(@PathParam("id") UUID id, @Valid ClaimRequest request) {
+        boolean success = claimService.verifyClaim(id, request.getCode());
+        return success ? Response.ok().build() : Response.status(401).entity("Invalid Code").build();
     }
 
     private ScanHistory createScanHistory(UUID qrId, HttpHeaders headers, RoutingContext rc) {
