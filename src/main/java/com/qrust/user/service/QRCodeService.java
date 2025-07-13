@@ -12,7 +12,7 @@ import io.quarkus.security.UnauthorizedException;
 import jakarta.annotation.security.RolesAllowed;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-import org.jetbrains.annotations.Nullable;
+import org.apache.commons.codec.digest.DigestUtils;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -65,7 +65,12 @@ public class QRCodeService {
         return qrCode;
     }
 
-
+    public QRCode claimQR(QRCode qrCode) {
+        qrCode.setStatus(QRStatus.ACTIVE);
+        qrCode.setOwner(userService.getCurrentUser());
+        qrCodeRepository.save(qrCode);
+        return qrCode;
+    }
 
 
     public void deleteQr(UUID qrId) {
@@ -162,7 +167,7 @@ public class QRCodeService {
         return entity;
     }
 
-    private @Nullable QRCode getQrAuthorisedCode(UUID id) {
+    private QRCode getQrAuthorisedCode(UUID id) {
         User currentUser = userService.getCurrentUser();
         QRCode qrCode = getQr(id);
         if (qrCode == null) return null;
@@ -173,4 +178,18 @@ public class QRCodeService {
     }
 
 
+    @RolesAllowed("admin")
+    public void mapQrToBarcode(UUID qrCodeId, String barcode) {
+        QRCode qrCode = getQr(qrCodeId);
+        if (qrCode == null) {
+            throw new IllegalArgumentException("QR Code cannot be null");
+        }
+        if (qrCode.getStatus() != QRStatus.UNASSIGNED) {
+            throw new IllegalArgumentException("QR Code must be in UNASSIGNED status to map to a barcode.");
+        }
+        String sha256Hex = DigestUtils.sha256Hex(barcode);
+        qrCode.setAccessCode(sha256Hex);
+        qrCode.setStatus(QRStatus.ASSIGNED);
+        qrCodeRepository.save(qrCode);
+    }
 }

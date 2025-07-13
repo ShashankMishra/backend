@@ -24,7 +24,8 @@ public class QRCode {
     private User createdBy;
     private QRDetails details;
     private boolean isPublic = true;
-    private Contact assignedOwnerContact;
+    private String accessCode;
+
 
     @DynamoDbPartitionKey
     public UUID getId() {

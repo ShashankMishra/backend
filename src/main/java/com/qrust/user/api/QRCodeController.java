@@ -164,8 +164,11 @@ public class QRCodeController {
     @POST
     @Path("/{id}/claim")
     public Response verifyClaim(@PathParam("id") UUID id, @Valid ClaimRequest request) {
-        boolean success = claimService.verifyClaim(id, request.getCode());
-        return success ? Response.ok().build() : Response.status(401).entity("Invalid Code").build();
+
+        //@TODO add rate limit for this endpoint
+
+        claimService.verifyClaim(id, request.getCode());
+        return Response.ok().build();
     }
 
     private ScanHistory createScanHistory(UUID qrId, HttpHeaders headers, RoutingContext rc) {

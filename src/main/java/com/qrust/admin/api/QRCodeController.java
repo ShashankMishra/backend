@@ -62,6 +62,15 @@ public class QRCodeController {
                 .build();
     }
 
+    @PUT
+    @Path("/{id}/map-qr-barcode")
+    @RolesAllowed("admin")
+    public Response mapQrs(@PathParam("id") UUID id, @Valid MapQrRequest request) {
+        log.info("Mapping QR Code with ID: {} to Barcode: {}", id, request.getBarcode());
+        qrCodeService.mapQrToBarcode(id, request.getBarcode());
+        return Response.ok("QR Code mapped to barcode successfully").build();
+    }
+
     private QRCodeRequest createDummyRequest(QRType type) {
         switch (type) {
             case QRType.VEHICLE:
