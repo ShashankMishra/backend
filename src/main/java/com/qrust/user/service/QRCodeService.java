@@ -182,10 +182,10 @@ public class QRCodeService {
     public void mapQrToBarcode(UUID qrCodeId, String barcode) {
         QRCode qrCode = getQr(qrCodeId);
         if (qrCode == null) {
-            throw new IllegalArgumentException("QR Code cannot be null");
+            throw new InvalidActionException("QR Code cannot be null");
         }
         if (qrCode.getStatus() != QRStatus.UNASSIGNED) {
-            throw new IllegalArgumentException("QR Code must be in UNASSIGNED status to map to a barcode.");
+            throw new InvalidActionException("QR Code must be in UNASSIGNED status to map to a barcode.");
         }
         String sha256Hex = DigestUtils.sha256Hex(barcode);
         qrCode.setAccessCode(sha256Hex);

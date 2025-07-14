@@ -7,10 +7,12 @@ import com.qrust.common.repository.OrderRepository;
 import io.quarkus.scheduler.Scheduled;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import lombok.extern.slf4j.Slf4j;
 
 import java.util.List;
 
 @ApplicationScoped
+@Slf4j
 public class PaymentOrderStatusScheduler {
 
     @Inject
@@ -27,22 +29,27 @@ public class PaymentOrderStatusScheduler {
 
     @Scheduled(every = "2m")
     void checkPendingOrders() {
-        List<PaymentOrder> pendingOrders = orderRepository.getAllByOrderStatus(OrderStatus.PENDING);
-        for (PaymentOrder order : pendingOrders) {
-            OrderStatusResponse response = phonepePaymentService.fetchOrderStatus(order.getMerchantOrderId());
-            String orderStatus = response.getState();
-            if (OrderStatus.COMPLETED.name().equals(orderStatus)) {
-                String userId = order.getUserId();
-                String planType = order.getPlanType().name();
-                if (!userService.isUserInGroup(userId, planType)) {
-                    cognitoService.upgradeUserGroup(userId, planType);
+        try {
+            List<PaymentOrder> pendingOrders = orderRepository.getAllByOrderStatus(OrderStatus.PENDING);
+            for (PaymentOrder order : pendingOrders) {
+                OrderStatusResponse response = phonepePaymentService.fetchOrderStatus(order.getMerchantOrderId());
+                String orderStatus = response.getState();
+                if (OrderStatus.COMPLETED.name().equals(orderStatus)) {
+                    String userId = order.getUserId();
+                    String planType = order.getPlanType().name();
+                    if (!userService.isUserInGroup(userId, planType)) {
+                        cognitoService.upgradeUserGroup(userId, planType);
+                    }
+                    order.setOrderStatus(OrderStatus.COMPLETED);
+                    orderRepository.save(order);
+                } else if (OrderStatus.FAILED.name().equals(orderStatus)) {
+                    order.setOrderStatus(OrderStatus.FAILED);
+                    orderRepository.save(order);
                 }
-                order.setOrderStatus(OrderStatus.COMPLETED);
-                orderRepository.save(order);
-            } else if (OrderStatus.FAILED.name().equals(orderStatus)) {
-                order.setOrderStatus(OrderStatus.FAILED);
-                orderRepository.save(order);
             }
+        } catch (Exception e) {
+            log.error("Error checking pending orders: {}", e.getMessage());
+
         }
     }
 }
