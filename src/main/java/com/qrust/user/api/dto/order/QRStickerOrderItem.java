@@ -9,6 +9,7 @@ public class QRStickerOrderItem extends OrderItem {
     private StickerType stickerType;
     private int templateId;
     private int quantity;
+    private String addressId;
     
     public QRStickerOrderItem() {
         setOrderItemType(OrderItemType.QR_STICKER);

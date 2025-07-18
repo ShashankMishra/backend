@@ -195,7 +195,8 @@ public class PhonepePaymentService {
                 QrStickerOrderDetails stickerDetails = new QrStickerOrderDetails(
                     stickerItem.getStickerType(),
                     stickerItem.getQuantity(),
-                    stickerItem.getTemplateId()
+                    stickerItem.getTemplateId(),
+                    stickerItem.getAddressId()
                 );
                 paymentOrder.setOrderDetails(stickerDetails);
             }

@@ -3,7 +3,12 @@ package com.qrust.user.service;
 import com.qrust.common.domain.order.PaymentOrder;
 import com.qrust.common.domain.User;
 import com.qrust.common.domain.UserRole;
+import com.qrust.common.domain.user.UserAddress;
+import com.qrust.common.domain.user.UserInfo;
 import com.qrust.common.repository.OrderRepository;
+import com.qrust.common.repository.UserInfoRepository;
+import com.qrust.user.api.dto.userinfo.UpgradeUserInfoRequest;
+import com.qrust.user.api.dto.userinfo.UserInfoResponse;
 import io.quarkus.security.identity.SecurityIdentity;
 import jakarta.enterprise.context.RequestScoped;
 import jakarta.inject.Inject;
@@ -36,6 +41,9 @@ public class UserService {
 
     @Inject
     OrderRepository orderRepository;
+
+    @Inject
+    UserInfoRepository userInfoRepository;
 
     public User getCurrentUser() {
         String sub = securityIdentity.getPrincipal().getName();
@@ -97,5 +105,49 @@ public class UserService {
     public List<PaymentOrder> getOrdersForCurrentUser() {
         String userId = getCurrentUser().getUserId();
         return orderRepository.getAllByUserId(userId);
+    }
+
+    public UserInfoResponse getUserInfoResponse(){
+        String userId = getCurrentUser().getUserId();
+        UserInfo userInfo = userInfoRepository.getByUserId(userId);
+        return new UserInfoResponse(userInfo.getAddresses());
+    }
+
+    public void upgradeUserInfo(UpgradeUserInfoRequest request) {
+        String userId = getCurrentUser().getUserId();
+        String addressId = request.getUserAddress().getAddressId();
+        UserInfo userInfo = userInfoRepository.getByUserId(userId);
+
+        if(addressId == null || addressId.isEmpty()) {
+            UserAddress newAddress = request.getUserAddress();
+            newAddress.setAddressId(java.util.UUID.randomUUID().toString());
+            newAddress.setAddressLine1(request.getUserAddress().getAddressLine1());
+            newAddress.setAddressLine2(request.getUserAddress().getAddressLine2());
+            newAddress.setCity(request.getUserAddress().getCity());
+            newAddress.setPincode(request.getUserAddress().getPincode());
+            newAddress.setPhoneNumber(request.getUserAddress().getPhoneNumber());
+
+            userInfo.getAddresses().add(newAddress);
+        }else{
+            UserAddress existingUserAddress = userInfo.getAddresses().stream().filter(a -> a.getAddressId().equals(addressId)).findFirst().get();
+            existingUserAddress.setAddressLine1(request.getUserAddress().getAddressLine1());
+            existingUserAddress.setAddressLine2(request.getUserAddress().getAddressLine2());
+            existingUserAddress.setCity(request.getUserAddress().getCity());
+            existingUserAddress.setPincode(request.getUserAddress().getPincode());
+            existingUserAddress.setPhoneNumber(request.getUserAddress().getPhoneNumber());
+        }
+
+        userInfoRepository.save(userInfo);
+    }
+
+    public void removeUserAddress(String addressId) {
+        String userId = getCurrentUser().getUserId();
+        UserInfo userInfo = userInfoRepository.getByUserId(userId);
+        if (addressId != null && !addressId.isEmpty()) {
+            userInfo.getAddresses().removeIf(address -> address.getAddressId().equals(addressId));
+            userInfoRepository.save(userInfo);
+        } else {
+            log.warn("Address ID is null or empty, cannot remove address for user: {}", userId);
+        }
     }
 }

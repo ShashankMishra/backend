@@ -2,7 +2,10 @@ package com.qrust.admin.service;
 
 import com.qrust.admin.api.dto.OrderShippingRequest;
 import com.qrust.common.domain.order.*;
+import com.qrust.common.domain.user.UserAddress;
+import com.qrust.common.domain.user.UserInfo;
 import com.qrust.common.repository.OrderRepository;
+import com.qrust.common.repository.UserInfoRepository;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 
@@ -14,6 +17,9 @@ public class OrderService {
 
     @Inject
     OrderRepository orderRepository;
+
+    @Inject
+    UserInfoRepository userInfoRepository;
 
     public List<PaymentOrder> getRecentOrders() {
         return orderRepository.getAllByPaymentStatus(PaymentStatus.PENDING);
@@ -36,5 +42,13 @@ public class OrderService {
         orderDetails.setShippingId(orderShippingRequest.getShippingId());
         orderDetails.setSerialNumber(orderShippingRequest.getSerialNumber());
         orderRepository.save(order);
+    }
+
+    public UserAddress getOrderAddressDetails(String userId, String addressId) {
+        UserInfo userInfo = userInfoRepository.getByUserId(userId);
+        List<UserAddress> addresses = userInfo.getAddresses();
+        return addresses.stream()
+                .filter(address -> address.getAddressId().equals(addressId))
+                .findFirst().get();
     }
 }

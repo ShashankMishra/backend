@@ -17,11 +17,13 @@ public class QrStickerOrderDetails extends OrderDetails {
     private int templateId;
     private String shippingId;
     private String serialNumber;
+    private String addressId;
     
-    public QrStickerOrderDetails(StickerType stickerType, int quantity, int templateId) {
+    public QrStickerOrderDetails(StickerType stickerType, int quantity, int templateId, String addressId) {
         this.stickerType = stickerType;
         this.quantity = quantity;
         this.templateId = templateId;
+        this.addressId = addressId;
         setOrderItemType(OrderItemType.QR_STICKER);
     }
 }

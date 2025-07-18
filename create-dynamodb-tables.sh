@@ -82,4 +82,12 @@ aws dynamodb create-table \
   --endpoint-url $ENDPOINT_URL \
   --region $REGION || true
 
+aws dynamodb create-table \
+    --table-name UserInfo \
+    --attribute-definitions AttributeName=userId,AttributeType=S \
+    --key-schema AttributeName=userId,KeyType=HASH \
+    --provisioned-throughput ReadCapacityUnits=5,WriteCapacityUnits=5 \
+    --endpoint-url $ENDPOINT_URL \
+    --region $REGION || true
+
 echo "Tables created in local DynamoDB."
