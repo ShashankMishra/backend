@@ -1,5 +1,6 @@
 package com.qrust.user.api.dto.order;
 
+import com.qrust.common.domain.user.UserAddress;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
@@ -9,8 +10,8 @@ public class QRStickerOrderItem extends OrderItem {
     private StickerType stickerType;
     private int templateId;
     private int quantity;
-    private String addressId;
-    
+    private UserAddress userAddress;
+
     public QRStickerOrderItem() {
         setOrderItemType(OrderItemType.QR_STICKER);
     }

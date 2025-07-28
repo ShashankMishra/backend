@@ -5,6 +5,7 @@ import com.qrust.user.service.UserService;
 import io.quarkus.security.Authenticated;
 import jakarta.annotation.security.RolesAllowed;
 import jakarta.inject.Inject;
+import jakarta.validation.Valid;
 import jakarta.ws.rs.DELETE;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.POST;
@@ -43,7 +44,7 @@ public class UserController {
     @POST
     @Path("/upgrade-info")
     @Authenticated
-    public Response upgradeUserInfo(UpgradeUserInfoRequest request) {
+    public Response upgradeUserInfo(@Valid UpgradeUserInfoRequest request) {
         userService.upgradeUserInfo(request);
         return Response.ok().build();
     }

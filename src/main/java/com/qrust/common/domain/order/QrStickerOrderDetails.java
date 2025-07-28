@@ -1,5 +1,6 @@
 package com.qrust.common.domain.order;
 
+import com.qrust.common.domain.user.UserAddress;
 import com.qrust.user.api.dto.order.OrderItemType;
 import com.qrust.user.api.dto.order.StickerType;
 import lombok.Data;
@@ -17,13 +18,13 @@ public class QrStickerOrderDetails extends OrderDetails {
     private int templateId;
     private String shippingId;
     private String serialNumber;
-    private String addressId;
+    private UserAddress userAddress;
     
-    public QrStickerOrderDetails(StickerType stickerType, int quantity, int templateId, String addressId) {
+    public QrStickerOrderDetails(StickerType stickerType, int quantity, int templateId, UserAddress userAddress) {
         this.stickerType = stickerType;
         this.quantity = quantity;
         this.templateId = templateId;
-        this.addressId = addressId;
+        this.userAddress = userAddress;
         setOrderItemType(OrderItemType.QR_STICKER);
     }
 }

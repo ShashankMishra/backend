@@ -31,7 +31,7 @@ public class PaymentOrderStatusScheduler {
     @Inject
     CognitoService cognitoService;
 
-    @Scheduled(every = "5m")
+    @Scheduled(every = "1m")
     void checkPendingOrders() {
         try {
             List<PaymentOrder> pendingOrders = orderRepository.getAllByPaymentStatus(PaymentStatus.PENDING);

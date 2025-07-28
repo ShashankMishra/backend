@@ -196,7 +196,7 @@ public class PhonepePaymentService {
                     stickerItem.getStickerType(),
                     stickerItem.getQuantity(),
                     stickerItem.getTemplateId(),
-                    stickerItem.getAddressId()
+                    stickerItem.getUserAddress()
                 );
                 paymentOrder.setOrderDetails(stickerDetails);
             }

@@ -119,7 +119,7 @@ public class UserService {
         UserInfo userInfo = userInfoRepository.getByUserId(userId);
 
         if(addressId == null || addressId.isEmpty()) {
-            UserAddress newAddress = request.getUserAddress();
+            UserAddress newAddress = new UserAddress();
             newAddress.setAddressId(java.util.UUID.randomUUID().toString());
             newAddress.setAddressLine1(request.getUserAddress().getAddressLine1());
             newAddress.setAddressLine2(request.getUserAddress().getAddressLine2());

@@ -43,12 +43,4 @@ public class OrderService {
         orderDetails.setSerialNumber(orderShippingRequest.getSerialNumber());
         orderRepository.save(order);
     }
-
-    public UserAddress getOrderAddressDetails(String userId, String addressId) {
-        UserInfo userInfo = userInfoRepository.getByUserId(userId);
-        List<UserAddress> addresses = userInfo.getAddresses();
-        return addresses.stream()
-                .filter(address -> address.getAddressId().equals(addressId))
-                .findFirst().get();
-    }
 }

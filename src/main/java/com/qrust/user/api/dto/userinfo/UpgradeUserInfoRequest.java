@@ -1,9 +1,10 @@
 package com.qrust.user.api.dto.userinfo;
 
-import com.qrust.common.domain.user.UserAddress;
+import jakarta.validation.Valid;
 import lombok.Data;
 
 @Data
 public class UpgradeUserInfoRequest {
-    private final UserAddress userAddress;
+    @Valid
+    private final UserAddressDto userAddress;
 }
