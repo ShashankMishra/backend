@@ -110,6 +110,7 @@ public class QRCodeService {
         resp.setCreatedAt(entity.getCreatedAt());
         resp.setDetails(entity.getDetails());
         resp.setPublic(entity.isPublic());
+        resp.setShortId(entity.getShortId());
         return resp;
     }
 

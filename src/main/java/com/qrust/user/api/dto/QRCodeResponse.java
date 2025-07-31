@@ -16,4 +16,5 @@ public class QRCodeResponse {
     private LocalDateTime createdAt;
     private QRDetails details;
     private boolean isPublic;
+    private String shortId;
 }
