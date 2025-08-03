@@ -23,4 +23,8 @@ public class UserAddressDto {
     @NotBlank
     @Size(min = 10, max = 10)
     private String phoneNumber;
+
+    @NotBlank
+    @Size(min = 1, max = 20)
+    private String name;
 }

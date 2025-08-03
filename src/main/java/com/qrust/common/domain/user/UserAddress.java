@@ -16,4 +16,5 @@ public class UserAddress {
     private String city;
     private String pincode;
     private String phoneNumber;
+    private String name;
 }

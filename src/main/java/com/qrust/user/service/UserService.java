@@ -107,7 +107,7 @@ public class UserService {
         return orderRepository.getAllByUserId(userId);
     }
 
-    public UserInfoResponse getUserInfoResponse(){
+    public UserInfoResponse getUserInfoResponse() {
         String userId = getCurrentUser().getUserId();
         UserInfo userInfo = userInfoRepository.getByUserId(userId);
         return new UserInfoResponse(userInfo.getAddresses());
@@ -118,24 +118,22 @@ public class UserService {
         String addressId = request.getUserAddress().getAddressId();
         UserInfo userInfo = userInfoRepository.getByUserId(userId);
 
-        if(addressId == null || addressId.isEmpty()) {
-            UserAddress newAddress = new UserAddress();
-            newAddress.setAddressId(java.util.UUID.randomUUID().toString());
-            newAddress.setAddressLine1(request.getUserAddress().getAddressLine1());
-            newAddress.setAddressLine2(request.getUserAddress().getAddressLine2());
-            newAddress.setCity(request.getUserAddress().getCity());
-            newAddress.setPincode(request.getUserAddress().getPincode());
-            newAddress.setPhoneNumber(request.getUserAddress().getPhoneNumber());
+        UserAddress userAddress = userInfo.getAddresses().stream()
+                .filter(a -> a.getAddressId().equals(addressId))
+                .findFirst()
+                .orElseGet(() -> {
+                    UserAddress newAddress = new UserAddress();
+                    newAddress.setAddressId(java.util.UUID.randomUUID().toString());
+                    userInfo.getAddresses().add(newAddress);
+                    return newAddress;
+                });
 
-            userInfo.getAddresses().add(newAddress);
-        }else{
-            UserAddress existingUserAddress = userInfo.getAddresses().stream().filter(a -> a.getAddressId().equals(addressId)).findFirst().get();
-            existingUserAddress.setAddressLine1(request.getUserAddress().getAddressLine1());
-            existingUserAddress.setAddressLine2(request.getUserAddress().getAddressLine2());
-            existingUserAddress.setCity(request.getUserAddress().getCity());
-            existingUserAddress.setPincode(request.getUserAddress().getPincode());
-            existingUserAddress.setPhoneNumber(request.getUserAddress().getPhoneNumber());
-        }
+        userAddress.setAddressLine1(request.getUserAddress().getAddressLine1());
+        userAddress.setAddressLine2(request.getUserAddress().getAddressLine2());
+        userAddress.setCity(request.getUserAddress().getCity());
+        userAddress.setPincode(request.getUserAddress().getPincode());
+        userAddress.setPhoneNumber(request.getUserAddress().getPhoneNumber());
+        userAddress.setName(request.getUserAddress().getName());
 
         userInfoRepository.save(userInfo);
     }
