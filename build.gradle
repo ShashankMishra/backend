@@ -37,6 +37,7 @@ dependencies {
     implementation 'com.phonepe:pg-sdk-java:2.1.4'
     implementation 'io.quarkus:quarkus-scheduler'
     implementation 'commons-codec:commons-codec'
+    implementation 'io.quarkus:quarkus-redis-client'
     annotationProcessor 'org.projectlombok:lombok:1.18.32'
 
     testImplementation 'io.quarkus:quarkus-junit5'
