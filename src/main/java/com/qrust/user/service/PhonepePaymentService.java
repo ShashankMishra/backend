@@ -141,7 +141,7 @@ public class PhonepePaymentService {
 
     private int computeOrderTotal(List<OrderItem> orderItems) {
         boolean hasQRSticker = false;
-        boolean hasBasicMembership = false;
+        boolean hasPremiumMembership = false;
 
         // First pass: check if we have both a QR sticker and a basic membership
         for (OrderItem orderItem : orderItems) {
@@ -149,8 +149,8 @@ public class PhonepePaymentService {
                 hasQRSticker = true;
             } else if (orderItem.getOrderItemType() == OrderItemType.MEMBERSHIP) {
                 MembershipOrderItem membershipItem = (MembershipOrderItem) orderItem;
-                if (membershipItem.getPlanType() == PlanType.BASIC) {
-                    hasBasicMembership = true;
+                if (membershipItem.getPlanType() == PlanType.PREMIUM) {
+                    hasPremiumMembership = true;
                 }
             }
         }
@@ -158,10 +158,10 @@ public class PhonepePaymentService {
         int total = 0;
         // Second pass: calculate total with special pricing if needed
         for (OrderItem orderItem : orderItems) {
-            if (hasQRSticker && hasBasicMembership && 
+            if (hasQRSticker && hasPremiumMembership &&
                 orderItem.getOrderItemType() == OrderItemType.MEMBERSHIP) {
                 MembershipOrderItem membershipItem = (MembershipOrderItem) orderItem;
-                if (membershipItem.getPlanType() == PlanType.BASIC) {
+                if (membershipItem.getPlanType() == PlanType.PREMIUM) {
                     // Use 0 as basic membership price when there's also a sticker item
                     // Do not add anything to the total
                 } else {

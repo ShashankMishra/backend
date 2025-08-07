@@ -44,9 +44,7 @@ public class CashfreePaymentService {
 
     private static final EnumMap<PlanType, Long> PLAN_PRICES = new EnumMap<>(PlanType.class);
     static {
-        PLAN_PRICES.put(PlanType.BASIC, 1L);
         PLAN_PRICES.put(PlanType.PREMIUM, 1L);
-        PLAN_PRICES.put(PlanType.BUSINESS, 1L);
         PLAN_PRICES.put(PlanType.FREE, 1L);
     }
 
@@ -97,7 +95,7 @@ public class CashfreePaymentService {
             JsonNode root = mapper.readTree(body);
             String eventType = root.has("type") ? root.get("type").asText() : null;
             if (Objects.equals(eventType, WebhookEventType.PAYMENT_SUCCESS_WEBHOOK.name())) {
-                cognitoService.upgradeUserGroup(userId, "basic");
+                cognitoService.upgradeUserGroup(userId, "premium");
             }
         } catch (Exception e) {
             throw new RuntimeException(e);

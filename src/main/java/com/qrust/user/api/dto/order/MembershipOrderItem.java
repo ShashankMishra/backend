@@ -16,12 +16,8 @@ public class MembershipOrderItem extends OrderItem {
     @Override
     public int calculatePrice() {
         switch (planType) {
-            case BASIC:
-                return 249;
             case PREMIUM:
-                return 100000;
-            case BUSINESS:
-                return 100000;
+                return 499; 
             default:
                 throw new IllegalArgumentException("Unsupported plan type: " + planType);
         }
