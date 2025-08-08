@@ -19,24 +19,26 @@ public class RedisService {
     private static final int TTL_SECONDS = 600;
     private static final int MAX_RETRIES = 5;
 
+    private static final String SHARED_TAG = "qrust";
+
     private static final String LUA_SCRIPT = """
             local contactKey = KEYS[1]
             local extensionKey = KEYS[2]
             local ttl = tonumber(ARGV[1])
             local contactNumber = ARGV[2]
             local extension = ARGV[3]
-            
+
             local existingExtension = redis.call("GET", contactKey)
             if existingExtension then
                 redis.call("EXPIRE", contactKey, ttl)
-                redis.call("EXPIRE", "extension:" .. existingExtension, ttl)
+                redis.call("EXPIRE", extensionKey, ttl)
                 return existingExtension
             end
-            
+
             if redis.call("EXISTS", extensionKey) == 1 then
                 return nil
             end
-            
+
             redis.call("SET", contactKey, extension, "EX", ttl)
             redis.call("SET", extensionKey, contactNumber, "EX", ttl)
             return extension
@@ -45,8 +47,8 @@ public class RedisService {
     public String getOrCreateExtension(String contactNumber) {
         for (int i = 0; i < MAX_RETRIES; i++) {
             String extension = generateRandom6DigitExtension();
-            String contactKey = "contact:" + contactNumber;
-            String extensionKey = "extension:" + extension;
+            String contactKey = String.format("contact:{%s}:%s", SHARED_TAG, contactNumber);
+            String extensionKey = String.format("extension:{%s}:%s", SHARED_TAG, extension);
 
             try {
                 Response response = redisAPI.eval(List.of(
@@ -72,7 +74,7 @@ public class RedisService {
     }
 
     public String getContactNumberByExtension(String extension) {
-        String extensionKey = "extension:" + extension;
+        String extensionKey = String.format("extension:{%s}:%s", SHARED_TAG, extension);
 
         try {
             Response response = redisAPI.get(extensionKey).toCompletionStage().toCompletableFuture().get();
