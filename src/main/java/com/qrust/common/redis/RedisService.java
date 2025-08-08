@@ -29,7 +29,7 @@ public class RedisService {
             local existingExtension = redis.call("GET", contactKey)
             if existingExtension then
                 redis.call("EXPIRE", contactKey, ttl)
-                redis.call("EXPIRE", "extension:" .. existingExtension, ttl)
+                redis.call("EXPIRE", "{extension}:" .. existingExtension, ttl)
                 return existingExtension
             end
             
@@ -45,8 +45,8 @@ public class RedisService {
     public String getOrCreateExtension(String contactNumber) {
         for (int i = 0; i < MAX_RETRIES; i++) {
             String extension = generateRandom6DigitExtension();
-            String contactKey = "contact:" + contactNumber;
-            String extensionKey = "extension:" + extension;
+            String contactKey = "{contact}:" + contactNumber;
+            String extensionKey = "{extension}:" + extension;
 
             try {
                 Response response = redisAPI.eval(List.of(
@@ -72,7 +72,7 @@ public class RedisService {
     }
 
     public String getContactNumberByExtension(String extension) {
-        String extensionKey = "extension:" + extension;
+        String extensionKey = "{extension}:" + extension;
 
         try {
             Response response = redisAPI.get(extensionKey).toCompletionStage().toCompletableFuture().get();
