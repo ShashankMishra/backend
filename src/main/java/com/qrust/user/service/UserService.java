@@ -1,5 +1,6 @@
 package com.qrust.user.service;
 
+import com.qrust.common.domain.Contact;
 import com.qrust.common.domain.order.PaymentOrder;
 import com.qrust.common.domain.User;
 import com.qrust.common.domain.UserRole;
@@ -44,6 +45,18 @@ public class UserService {
 
     @Inject
     UserInfoRepository userInfoRepository;
+
+    public void addContact(String id, String number) {
+        Contact contact = new Contact();
+        contact.setName(id);
+        contact.setPhoneNumber(number);
+
+        String userId = getCurrentUser().getUserId();
+        UserInfo userInfo = userInfoRepository.getByUserId(userId);
+        userInfo.addContact(contact);
+        userInfoRepository.save(userInfo);
+        log.info("Contact added for user '{}': {}", userId, contact);
+    }
 
     public User getCurrentUser() {
         String sub = securityIdentity.getPrincipal().getName();
@@ -147,5 +160,10 @@ public class UserService {
         } else {
             log.warn("Address ID is null or empty, cannot remove address for user: {}", userId);
         }
+    }
+
+    public UserInfo getCurrentUserInfo() {
+        String userId = getCurrentUser().getUserId();
+        return userInfoRepository.getByUserId(userId);
     }
 }

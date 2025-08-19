@@ -1,5 +1,7 @@
 package com.qrust.common.redis;
 
+import com.qrust.user.api.dto.ContactDto;
+import com.qrust.user.api.dto.ContactOtp;
 import io.vertx.redis.client.RedisAPI;
 import io.vertx.redis.client.Response;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -27,18 +29,18 @@ public class RedisService {
             local ttl = tonumber(ARGV[1])
             local contactNumber = ARGV[2]
             local extension = ARGV[3]
-
+            
             local existingExtension = redis.call("GET", contactKey)
             if existingExtension then
                 redis.call("EXPIRE", contactKey, ttl)
                 redis.call("EXPIRE", extensionKey, ttl)
                 return existingExtension
             end
-
+            
             if redis.call("EXISTS", extensionKey) == 1 then
                 return nil
             end
-
+            
             redis.call("SET", contactKey, extension, "EX", ttl)
             redis.call("SET", extensionKey, contactNumber, "EX", ttl)
             return extension
@@ -121,4 +123,60 @@ public class RedisService {
     private String generateRandom6DigitExtension() {
         return String.format("%06d", ThreadLocalRandom.current().nextInt(0, 1_000_000));
     }
+
+    //save uuid, number and otp in redis for otp verification
+    public void saveContactOtp(String contactId, ContactDto contactDto, Integer otp) {
+        String key = "contact:" + contactId;
+        try {
+            // Store both number and otp in a Redis hash
+            redisAPI.hset(List.of(
+                    key,
+                    "number", contactDto.getPhoneNumber(),
+                    "otp", otp.toString(),
+                    "name", contactDto.getName(),
+                    "EX", // TTL flag
+                    String.valueOf(TTL_SECONDS)
+            )).toCompletionStage().toCompletableFuture().get();
+        } catch (Exception e) {
+            e.printStackTrace(); // Use proper logging in real app
+        }
+    }
+
+    public ContactOtp getContact(String contactId) {
+        String key = "contact:" + contactId;
+        try {
+            var map = redisAPI.hgetall(key)
+                    .toCompletionStage()
+                    .toCompletableFuture()
+                    .get();
+
+            String name = map.get("name") != null ? map.get("name").toString() : null;
+            String number = map.get("number") != null ? map.get("number").toString() : null;
+            String otp = map.get("otp") != null ? map.get("otp").toString() : null;
+
+            ContactDto contactDto = ContactDto.builder()
+                    .name(name)
+                    .phoneNumber(number)
+                    .createdAt(new java.util.Date()) // you’re using "now" here
+                    .build();
+
+            return new ContactOtp(contactId, contactDto, otp);
+
+        } catch (Exception e) {
+            e.printStackTrace(); // replace with proper logging
+            return null;
+        }
+    }
+
+    public void removeContactOtp(String contactId) {
+        String key = "contact:" + contactId;
+        try {
+            redisAPI.del(List.of(key))
+                    .toCompletionStage().toCompletableFuture().get();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+
 }
