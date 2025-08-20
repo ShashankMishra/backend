@@ -163,7 +163,7 @@ public class QRCodeService {
         return entity;
     }
 
-    private QRCode getQrAuthorisedCode(UUID id) {
+    public QRCode getQrAuthorisedCode(UUID id) {
         User currentUser = userService.getCurrentUser();
         QRCode qrCode = getQr(id);
         if (qrCode == null) return null;
