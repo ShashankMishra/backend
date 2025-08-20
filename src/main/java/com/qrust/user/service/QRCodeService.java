@@ -135,16 +135,6 @@ public class QRCodeService {
     }
 
 
-    public QRCodePublicResponse toPublicResponse(QRCode entity) {
-        if (entity == null) return null;
-        QRCodePublicResponse resp = new QRCodePublicResponse();
-        resp.setId(entity.getId());
-        resp.setType(entity.getType());
-        resp.setDetails(entity.getDetails());
-        return resp;
-    }
-
-
     public QRCode updateIsPublic(UUID id, boolean isPublic) {
         QRCode qrCode = getQrAuthorisedCode(id);
         if (qrCode == null) return null;
@@ -168,7 +158,7 @@ public class QRCodeService {
         return entity;
     }
 
-    private QRCode getQrAuthorisedCode(UUID id) {
+    public QRCode getQrAuthorisedCode(UUID id) {
         User currentUser = userService.getCurrentUser();
         QRCode qrCode = getQr(id);
         if (qrCode == null) return null;

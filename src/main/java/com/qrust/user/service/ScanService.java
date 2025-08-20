@@ -53,9 +53,9 @@ public class ScanService {
             throw new IllegalArgumentException("QR Code is valid but not assigned yet, please check with seller/agent or contact our support.");
         }
         List<ScanHistory> scanHistoryForQr = getScanHistoryForQr(history.getQrId());
-        /*if (checkScanLimit(scanHistoryForQr, qrCode)) {
+        if (checkScanLimit(scanHistoryForQr, qrCode)) {
             throw new LimitReachedException("Scan limit reached, Owner need to upgrade plan to allow more scans.");
-        }*/
+        }
         // if scan history already exists based on ip address and qrId within last 1 min then return existing history
         ScanHistory finalHistory = history;
         Optional<ScanHistory> existingHistory = scanHistoryForQr.stream().filter(h -> h.getScannerIp().equals(finalHistory.getScannerIp()) && h.getQrId().equals(finalHistory.getQrId()))
