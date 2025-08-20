@@ -3,6 +3,7 @@ package com.qrust.user.api;
 import com.qrust.common.domain.QRCode;
 import com.qrust.common.domain.ScanHistory;
 import com.qrust.user.api.dto.LocationRequest;
+import com.qrust.user.service.CallService;
 import com.qrust.user.service.QRCodeService;
 import com.qrust.user.service.ScanService;
 import io.quarkus.security.Authenticated;
@@ -28,6 +29,8 @@ public class ScanController {
 
     @Inject
     QRCodeService qrCodeService;
+    @Inject
+    CallService callService;
 
     @GET
     @Path("/{scanId}")
@@ -42,6 +45,8 @@ public class ScanController {
             return Response.status(Response.Status.PRECONDITION_FAILED).build();
         }
         QRCode qrCode = qrCodeService.getQr(scanHistory.getQrId());
+        qrCode = callService.getMaskedNumberForQr(qrCode);
+
         return Response.ok(qrCodeService.toResponse(qrCode)).build();
     }
 
