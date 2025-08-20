@@ -7,6 +7,7 @@ import io.vertx.redis.client.Response;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import lombok.RequiredArgsConstructor;
+import org.eclipse.microprofile.config.inject.ConfigProperty;
 
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
@@ -17,6 +18,9 @@ public class RedisService {
 
     @Inject
     RedisAPI redisAPI;
+
+    @ConfigProperty(name = "rate.limit.ttl.seconds", defaultValue = "120")
+    Integer rateLimitTtlSeconds;
 
     private static final int TTL_SECONDS = 600;
     private static final int MAX_RETRIES = 5;
@@ -176,6 +180,23 @@ public class RedisService {
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    public long incrementAndGetCount(String callFrom, String callTo) {
+        String key = String.format("rate_limit:%s:%s", callFrom, callTo);
+        try {
+            Response response = redisAPI.incr(key).toCompletionStage().toCompletableFuture().get();
+            if (response != null) {
+                long count = response.toLong();
+                if (count == 1) {
+                    redisAPI.expire(List.of(key, String.valueOf(rateLimitTtlSeconds)));
+                }
+                return count;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return 0;
     }
 
 

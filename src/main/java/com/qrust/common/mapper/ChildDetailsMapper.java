@@ -10,7 +10,6 @@ public class ChildDetailsMapper implements QRDetailsMapper<ChildDetailsDto, Chil
         ChildDetails cd = new ChildDetails();
         cd.setFullName(dto.getFullName());
         cd.setSchoolName(dto.getSchoolName());
-        cd.setSchoolContact(ContactMapper.map(dto.getSchoolContact()));
         cd.setEmergencyContact(ContactMapper.map(dto.getEmergencyContact()));
         cd.setMedicalDetails(MedicalDetailsMapper.map(dto.getMedicalDetails()));
         return cd;
