@@ -1,6 +1,4 @@
-package com.qrust.user.service;
-
-import com.qrust.user.exceptions.CustomUIException;
+package com.qrust.user.exceptions;
 
 public class InvalidActionException extends CustomUIException {
     public InvalidActionException(String s) {

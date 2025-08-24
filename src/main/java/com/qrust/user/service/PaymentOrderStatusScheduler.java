@@ -1,11 +1,10 @@
 package com.qrust.user.service;
 
 import com.phonepe.sdk.pg.common.models.response.OrderStatusResponse;
-import com.qrust.common.domain.order.MembershipOrderDetails;
 import com.qrust.common.domain.order.OrderStatus;
 import com.qrust.common.domain.order.PaymentOrder;
 import com.qrust.common.domain.order.PaymentStatus;
-import com.qrust.common.repository.OrderRepository;
+import com.qrust.common.domain.order.QRUpgradeOrderDetails;
 import com.qrust.user.api.dto.order.OrderItemType;
 import io.quarkus.scheduler.Scheduled;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -14,46 +13,42 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.UUID;
 
 @ApplicationScoped
 @Slf4j
 public class PaymentOrderStatusScheduler {
 
     @Inject
-    OrderRepository orderRepository;
+    OrderService orderService;
 
     @Inject
     PhonepePaymentService phonepePaymentService;
 
     @Inject
-    UserService userService;
-
-    @Inject
-    CognitoService cognitoService;
+    QRCodeService qrCodeService;
 
     @Scheduled(every = "1m")
     void checkPendingOrders() {
         try {
-            List<PaymentOrder> pendingOrders = orderRepository.getAllByPaymentStatus(PaymentStatus.PENDING);
+            List<PaymentOrder> pendingOrders = orderService.getAllByPaymentStatus(PaymentStatus.PENDING);
             for (PaymentOrder order : pendingOrders) {
                 OrderStatusResponse response = phonepePaymentService.fetchOrderStatus(order.getMerchantOrderId());
                 String paymentStatus = response.getState();
                 if (PaymentStatus.COMPLETED.name().equals(paymentStatus)) {
-                    if (Objects.equals(order.getOrderItemType(), OrderItemType.MEMBERSHIP)) {
-                        String userId = order.getUserId();
-                        MembershipOrderDetails membershipDetails = (MembershipOrderDetails) order.getOrderDetails();
-                        String planType = membershipDetails.getPlanType().name();
-                        if (!userService.isUserInGroup(userId, planType)) {
-                            cognitoService.upgradeUserGroup(userId, planType);
-                        }
+                    if (Objects.equals(order.getOrderItemType(), OrderItemType.QR_UPGRADE)) {
+                        QRUpgradeOrderDetails upgradeOrderDetails = (QRUpgradeOrderDetails) order.getOrderDetails();
+                        UUID qrId = upgradeOrderDetails.getQrCodeId();
+                        qrCodeService.upgradeQrToPremium(qrId);
                     } else if (Objects.equals(order.getOrderItemType(), OrderItemType.QR_STICKER)) {
                         order.setOrderStatus(OrderStatus.CREATED);
                     }
                     order.setPaymentStatus(PaymentStatus.COMPLETED);
-                    orderRepository.save(order);
+                    orderService.save(order);
+
                 } else if (PaymentStatus.FAILED.name().equals(paymentStatus)) {
                     order.setPaymentStatus(PaymentStatus.FAILED);
-                    orderRepository.save(order);
+                    orderService.save(order);
                 }
             }
         } catch (Exception e) {

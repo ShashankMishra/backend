@@ -30,7 +30,7 @@ public class ScanService {
     QRCodeService qrCodeService;
 
     @Inject
-    UserLimitService userLimitService;
+    LimitService limitService;
 
     @Inject
     UserService userService;
@@ -72,7 +72,7 @@ public class ScanService {
     }
 
     private boolean checkScanLimit(List<ScanHistory> scanHistoryForQr, QRCode qrCode) {
-        return qrCode.getStatus() == QRStatus.ACTIVE  && scanHistoryForQr.size() >= userLimitService.getScanLimitForUser(userService.getUserById(qrCode.getOwner().getUserId()));
+        return qrCode.getStatus() == QRStatus.ACTIVE  && scanHistoryForQr.size() >= limitService.getScanLimitForQR(qrCode);
     }
 
     private void saveWithLocation(ScanHistory history) {

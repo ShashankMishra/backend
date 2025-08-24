@@ -7,6 +7,7 @@ import com.qrust.common.domain.User;
 import com.qrust.common.mapper.*;
 import com.qrust.common.repository.QRCodeRepository;
 import com.qrust.user.api.dto.*;
+import com.qrust.user.exceptions.InvalidActionException;
 import com.qrust.user.exceptions.LimitReachedException;
 import io.quarkus.security.UnauthorizedException;
 import jakarta.annotation.security.RolesAllowed;
@@ -27,7 +28,7 @@ public class QRCodeService {
     UserService userService;
 
     @Inject
-    UserLimitService userLimitService;
+    LimitService limitService;
 
 
     // Mappers
@@ -39,8 +40,8 @@ public class QRCodeService {
 
 
     public QRCode createUserQr(QRCodeRequest req) throws LimitReachedException {
-        if (getAllQrs().size() >= userLimitService.getQrLimitForUser(userService.getCurrentUser())) {
-            throw new LimitReachedException("QR code limit reached, Please upgrade your plan to create more QR's.");
+        if (getAllQrs().size() >= limitService.getQrCreationLimitForUser()) {
+            throw new LimitReachedException("QR code limit reached, More QR codes not allowed for this account.");
         }
         QRCode entity = toEntity(req);
         entity.setId(UUID.randomUUID());
@@ -111,6 +112,7 @@ public class QRCodeService {
         resp.setDetails(entity.getDetails());
         resp.setPublic(entity.isPublic());
         resp.setShortId(entity.getShortId());
+        resp.setPremium(entity.isPremium());
         return resp;
     }
 
@@ -135,16 +137,6 @@ public class QRCodeService {
     }
 
 
-    public QRCodePublicResponse toPublicResponse(QRCode entity) {
-        if (entity == null) return null;
-        QRCodePublicResponse resp = new QRCodePublicResponse();
-        resp.setId(entity.getId());
-        resp.setType(entity.getType());
-        resp.setDetails(entity.getDetails());
-        return resp;
-    }
-
-
     public QRCode updateIsPublic(UUID id, boolean isPublic) {
         QRCode qrCode = getQrAuthorisedCode(id);
         if (qrCode == null) return null;
@@ -163,6 +155,7 @@ public class QRCodeService {
         entity.setOwner(currentUser);
         entity.setStatus(QRStatus.UNASSIGNED);
         entity.setCreatedBy(currentUser);
+        entity.setPremium(true);
 
         qrCodeRepository.save(entity);
         return entity;
@@ -191,6 +184,12 @@ public class QRCodeService {
         String sha256Hex = DigestUtils.sha256Hex(barcode);
         qrCode.setAccessCode(sha256Hex);
         qrCode.setStatus(QRStatus.ASSIGNED);
+        qrCodeRepository.save(qrCode);
+    }
+
+    public void upgradeQrToPremium(UUID qrCodeId) {
+        QRCode qrCode = getQr(qrCodeId);
+        qrCode.setPremium(true);
         qrCodeRepository.save(qrCode);
     }
 }
