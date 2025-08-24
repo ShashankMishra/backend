@@ -20,7 +20,7 @@ public class OrderService {
     }
 
     public List<PaymentOrder> getAllByPaymentStatus(PaymentStatus paymentStatus) {
-        return orderRepository.getAllByPaymentStatus(PaymentStatus.PENDING);
+        return orderRepository.getAllByPaymentStatus(paymentStatus);
     }
 
     public void save(PaymentOrder order) {
