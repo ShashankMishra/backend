@@ -156,7 +156,7 @@ public class PhonepePaymentService {
 
             if (orderItem.getOrderItemType() == OrderItemType.QR_UPGRADE) {
                 QRUpgrade qrUpgrade = (QRUpgrade) orderItem;
-                QRUpgradeOrderDetails qrUpgradeOrderDetails = new QRUpgradeOrderDetails(qrUpgrade.getQrId());
+                QRUpgradeOrderDetails qrUpgradeOrderDetails = new QRUpgradeOrderDetails(qrUpgrade.getQrCodeId());
                 paymentOrder.setOrderDetails(qrUpgradeOrderDetails);
             } else if (orderItem.getOrderItemType() == OrderItemType.QR_STICKER) {
                 com.qrust.user.api.dto.order.QRStickerOrderItem stickerItem = (com.qrust.user.api.dto.order.QRStickerOrderItem) orderItem;

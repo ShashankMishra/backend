@@ -35,6 +35,7 @@ public class PaymentController {
         if (requestDto.getOrderItems() == null || requestDto.getOrderItems().isEmpty()) {
             return Response.status(Response.Status.BAD_REQUEST).entity("Order items cannot be empty").build();
         }
+        log.info("Create order request: {}", requestDto);
 
         StandardCheckoutPayResponse checkoutPayResponse = phonepePaymentService.createOrder(requestDto.getOrderItems());
         return Response.ok(checkoutPayResponse).build();

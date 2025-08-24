@@ -9,7 +9,7 @@ import java.util.UUID;
 @Data
 @EqualsAndHashCode(callSuper = true)
 public class QRUpgrade extends OrderItem {
-    private UUID qrId;
+    private UUID qrCodeId;
     private UserAddress userAddress;
 
     public QRUpgrade() {
