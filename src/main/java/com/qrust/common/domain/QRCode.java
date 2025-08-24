@@ -25,6 +25,7 @@ public class QRCode {
     private QRDetails details;
     private boolean isPublic = true;
     private String accessCode;
+    private boolean isPremium = false;
 
 
     @DynamoDbPartitionKey

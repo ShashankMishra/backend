@@ -11,7 +11,7 @@ import lombok.Data;
     property = "orderItemType"
 )
 @JsonSubTypes({
-    @JsonSubTypes.Type(value = MembershipOrderItem.class, name = "MEMBERSHIP"),
+    @JsonSubTypes.Type(value = QRUpgrade.class, name = "QR_UPGRADE"),
     @JsonSubTypes.Type(value = QRStickerOrderItem.class, name = "QR_STICKER")
 })
 public abstract class OrderItem {

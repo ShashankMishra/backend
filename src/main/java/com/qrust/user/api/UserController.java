@@ -6,14 +6,12 @@ import com.qrust.user.api.dto.ContactOtp;
 import com.qrust.user.api.dto.userinfo.UpgradeUserInfoRequest;
 import com.qrust.user.service.UserService;
 import io.quarkus.security.Authenticated;
-import jakarta.annotation.security.RolesAllowed;
 import jakarta.inject.Inject;
 import jakarta.validation.Valid;
 import jakarta.ws.rs.DELETE;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
-import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.SecurityContext;
 import lombok.extern.slf4j.Slf4j;
@@ -29,14 +27,6 @@ public class UserController {
     @Inject
     RedisService redisService;
 
-
-    @GET
-    @Path("/is-premium")
-    @RolesAllowed("premium") // Only normal users can upgrade
-    public Response isPremium(@Context SecurityContext securityContext) {
-        String username = securityContext.getUserPrincipal().getName();
-        return Response.ok().entity("User is premium : " + username).build();
-    }
 
     @GET
     @Path("/orders")

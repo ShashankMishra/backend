@@ -41,7 +41,7 @@ public class OrderDetailsConverter implements AttributeConverter<OrderDetails> {
         OrderItemType type = OrderItemType.valueOf(node.get("orderItemType").asText());
 
         return switch (type) {
-            case MEMBERSHIP -> mapper.treeToValue(node, MembershipOrderDetails.class);
+            case QR_UPGRADE -> mapper.treeToValue(node, QRUpgradeOrderDetails.class);
             case QR_STICKER -> mapper.treeToValue(node, QrStickerOrderDetails.class);
         };
     }

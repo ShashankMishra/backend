@@ -6,7 +6,6 @@ import com.qrust.common.domain.order.PaymentOrder;
 import com.qrust.common.domain.order.PaymentStatus;
 import com.qrust.common.domain.order.QrStickerOrderDetails;
 import com.qrust.common.repository.OrderRepository;
-import com.qrust.common.repository.UserInfoRepository;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 
@@ -19,8 +18,6 @@ public class OrderService {
     @Inject
     OrderRepository orderRepository;
 
-    @Inject
-    UserInfoRepository userInfoRepository;
 
     public List<PaymentOrder> getRecentOrders() {
         return orderRepository.getAllByPaymentStatus(PaymentStatus.PENDING);

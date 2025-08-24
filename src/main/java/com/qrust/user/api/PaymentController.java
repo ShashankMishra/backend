@@ -35,6 +35,7 @@ public class PaymentController {
         if (requestDto.getOrderItems() == null || requestDto.getOrderItems().isEmpty()) {
             return Response.status(Response.Status.BAD_REQUEST).entity("Order items cannot be empty").build();
         }
+        log.info("Create order request: {}", requestDto);
 
         StandardCheckoutPayResponse checkoutPayResponse = phonepePaymentService.createOrder(requestDto.getOrderItems());
         return Response.ok(checkoutPayResponse).build();
@@ -73,31 +74,4 @@ public class PaymentController {
         phonepePaymentService.handleWebhook(receivedAuth, body);
         return Response.ok().build();
     }
-
-//    @POST
-//    @Path("/create-order")
-//    public Response createOrder(CreateOrderRequest requestDto) {
-//        log.info("Create a order: {}", requestDto);
-//        log.info("Cashfree client id: {}", cashfreeClientId);
-//        OrderEntity orderEntity = paymentService.createOrder(requestDto.getPlanType());
-//        return Response.ok(orderEntity).build();
-//    }
-//
-//    @GET
-//    @Path("/fetch-order/{orderId}")
-//    public Response fetchOrder(@PathParam("orderId") String orderId) {
-//        OrderEntity orderEntity = paymentService.fetchOrder(orderId);
-//        return Response.ok(orderEntity).build();
-//    }
-//
-//    @POST
-//    @Path("/webhook/{userId}")
-//    @PermitAll
-//    public Response handleWebhook(@Context HttpHeaders headers, String body, @PathParam("userId") String userId) {
-//        String signature = headers.getHeaderString("x-webhook-signature");
-//        String timestamp = headers.getHeaderString("x-webhook-timestamp");
-//        //TODO: verify cashfree webhook signature
-//        cashfreePaymentService.handleWebhook(body, userId);
-//        return Response.ok().build();
-//    }
 }

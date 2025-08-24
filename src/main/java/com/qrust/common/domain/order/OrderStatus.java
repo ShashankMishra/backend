@@ -4,5 +4,6 @@ public enum OrderStatus {
     INVALID,
     CREATED,
     SHIPPED,
-    DELIVERED
+    DELIVERED,
+    COMPLETED
 }
