@@ -15,7 +15,7 @@ import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbBean;
     property = "orderItemType"
 )
 @JsonSubTypes({
-    @JsonSubTypes.Type(value = QRUpgradeOrderDetails.class, name = "MEMBERSHIP"),
+    @JsonSubTypes.Type(value = QRUpgradeOrderDetails.class, name = "QR_UPGRADE"),
     @JsonSubTypes.Type(value = QrStickerOrderDetails.class, name = "QR_STICKER")
 })
 public abstract class OrderDetails {
