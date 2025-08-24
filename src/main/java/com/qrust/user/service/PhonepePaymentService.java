@@ -113,9 +113,10 @@ public class PhonepePaymentService {
             for (PaymentOrder paymentOrder : paymentOrders) {
                 if (Objects.equals(orderStatus, PaymentStatus.COMPLETED.name())) {
                     if (Objects.equals(paymentOrder.getOrderItemType(), OrderItemType.QR_UPGRADE)) {
+                        paymentOrder.setPaymentStatus(PaymentStatus.COMPLETED);
                         QRUpgradeOrderDetails qrUpgradeOrderDetails = (QRUpgradeOrderDetails) paymentOrder.getOrderDetails();
                         qrCodeService.upgradeQrToPremium(qrUpgradeOrderDetails.getQrCodeId());
-                        paymentOrder.setPaymentStatus(PaymentStatus.COMPLETED);
+                        paymentOrder.setOrderStatus(OrderStatus.COMPLETED);
                     } else if (Objects.equals(paymentOrder.getOrderItemType(), OrderItemType.QR_STICKER)) {
                         paymentOrder.setOrderStatus(OrderStatus.CREATED);
                         paymentOrder.setPaymentStatus(PaymentStatus.COMPLETED);
