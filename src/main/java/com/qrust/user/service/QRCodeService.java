@@ -19,6 +19,8 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
+import static com.qrust.common.domain.QRStatus.ACTIVE;
+
 @ApplicationScoped
 public class QRCodeService {
     @Inject
@@ -40,7 +42,7 @@ public class QRCodeService {
 
 
     public QRCode createUserQr(QRCodeRequest req) throws LimitReachedException {
-        if (getAllQrs().size() >= limitService.getQrCreationLimitForUser()) {
+        if (getAllQrs().stream().filter(qr -> qr.getStatus() == ACTIVE).toList().size() >= limitService.getQrCreationLimitForUser()) {
             throw new LimitReachedException("QR code limit reached, More QR codes not allowed for this account.");
         }
         QRCode entity = toEntity(req);
@@ -49,7 +51,7 @@ public class QRCodeService {
         entity.setCreatedAt(LocalDateTime.now());
         User currentUser = userService.getCurrentUser();
         entity.setOwner(currentUser);
-        entity.setStatus(QRStatus.ACTIVE);
+        entity.setStatus(ACTIVE);
         entity.setCreatedBy(currentUser);
 
         qrCodeRepository.save(entity);
@@ -67,7 +69,7 @@ public class QRCodeService {
     }
 
     public QRCode claimQR(QRCode qrCode) {
-        qrCode.setStatus(QRStatus.ACTIVE);
+        qrCode.setStatus(ACTIVE);
         qrCode.setOwner(userService.getCurrentUser());
         qrCodeRepository.save(qrCode);
         return qrCode;
