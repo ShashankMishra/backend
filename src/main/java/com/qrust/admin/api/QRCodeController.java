@@ -122,7 +122,7 @@ public class QRCodeController {
     }
 
     private ContactDto dummyContact() {
-        return ContactDto.builder().phoneNumber("1234567890").name("John Doe").build();
+        return ContactDto.builder().phoneNumber("1234567890").build();
     }
 
 

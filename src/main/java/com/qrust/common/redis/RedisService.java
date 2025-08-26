@@ -137,7 +137,6 @@ public class RedisService {
                     key,
                     "number", contactDto.getPhoneNumber(),
                     "otp", otp.toString(),
-                    "name", contactDto.getName(),
                     "EX", // TTL flag
                     String.valueOf(TTL_SECONDS)
             )).toCompletionStage().toCompletableFuture().get();
@@ -159,7 +158,6 @@ public class RedisService {
             String otp = map.get("otp") != null ? map.get("otp").toString() : null;
 
             ContactDto contactDto = ContactDto.builder()
-                    .name(name)
                     .phoneNumber(number)
                     .createdAt(new java.util.Date()) // you’re using "now" here
                     .build();
