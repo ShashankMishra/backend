@@ -136,6 +136,7 @@ public class RedisService {
             redisAPI.hset(List.of(
                     key,
                     "number", contactDto.getPhoneNumber(),
+                    "name", contactDto.getName(),
                     "otp", otp.toString(),
                     "EX", // TTL flag
                     String.valueOf(TTL_SECONDS)
@@ -159,6 +160,7 @@ public class RedisService {
 
             ContactDto contactDto = ContactDto.builder()
                     .phoneNumber(number)
+                    .name(name)
                     .createdAt(new java.util.Date()) // you’re using "now" here
                     .build();
 
