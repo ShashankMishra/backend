@@ -3,7 +3,6 @@ package com.qrust.common.redis;
 import io.vertx.redis.client.RedisAPI;
 import io.vertx.redis.client.Response;
 import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Inject;
 import lombok.RequiredArgsConstructor;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 
@@ -14,8 +13,7 @@ import java.util.concurrent.ThreadLocalRandom;
 @ApplicationScoped
 public class RedisService {
 
-    @Inject
-    RedisAPI redisAPI;
+    private final RedisAPI redisAPI;
 
     @ConfigProperty(name = "rate.limit.ttl.seconds", defaultValue = "120")
     Integer rateLimitTtlSeconds;
@@ -47,6 +45,10 @@ public class RedisService {
             redis.call("SET", extensionKey, contactNumber, "EX", ttl)
             return extension
             """;
+
+    public RedisAPI getRedisAPI() {
+        return redisAPI;
+    }
 
     public String getOrCreateExtension(String contactNumber) {
         for (int i = 0; i < MAX_RETRIES; i++) {

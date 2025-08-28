@@ -15,10 +15,13 @@ import java.io.IOException;
 @RequiredArgsConstructor
 public class MessageService {
 
+    private final LimitService limitService;
+
     @ConfigProperty(name = "messageCentralAuthToken")
     String messageCentralAuthToken;
 
     public String sendOtp(String phoneNumber) throws IOException {
+        limitService.checkOtpRateLimit();
         OkHttpClient client = new OkHttpClient()
                 .newBuilder()
                 .build();
