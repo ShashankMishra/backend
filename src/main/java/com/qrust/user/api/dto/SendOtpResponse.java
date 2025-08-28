@@ -5,8 +5,6 @@ import lombok.Data;
 
 @Data
 @AllArgsConstructor
-public class ContactOtp {
+public class SendOtpResponse {
     private String verificationId;
-    private ContactDto contactDto;
-    private String otp;
 }
