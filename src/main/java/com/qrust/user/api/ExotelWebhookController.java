@@ -7,9 +7,11 @@ import jakarta.ws.rs.GET;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.QueryParam;
+import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import lombok.extern.slf4j.Slf4j;
+import org.eclipse.microprofile.config.inject.ConfigProperty;
 
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -23,11 +25,20 @@ public class ExotelWebhookController {
     @Inject
     RedisService redisService;
 
+    @ConfigProperty(name = "rate.limit.max.requests", defaultValue = "5")
+    Integer rateLimitMaxRequests;
+
     @GET
     @PermitAll
     @Path("/pass-thru")
-    public Response passThru(@QueryParam("CallSid") String callSid, @QueryParam("digits") String digits) {
-        log.info("Received pass-thru webhook from Exotel for CallSid: {} and digits: {}", callSid, digits);
+    public Response passThru(@QueryParam("CallSid") String callSid, @QueryParam("digits") String digits, @QueryParam("CallFrom") String callFrom, @QueryParam("CallTo") String callTo) {
+        log.info("Received pass-thru webhook from Exotel for CallSid: {} and digits: {} and callFrom: {}", callSid, digits, callFrom);
+
+        long count = redisService.incrementAndGetCount(callFrom, callTo);
+        if (count > rateLimitMaxRequests) {
+            throw new WebApplicationException("Rate limit exceeded for this number combination", Response.Status.TOO_MANY_REQUESTS);
+        }
+
         String contactNumber = redisService.getContactNumberByExtension(digits.replace("\"", ""));
         log.info("Found contact number: {} for extension: {}", contactNumber, digits);
         redisService.storeSidToContact(callSid, contactNumber);

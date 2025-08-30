@@ -11,7 +11,7 @@ public class GlobalExceptionHandler implements ExceptionMapper<Exception> {
 
     @Override
     public Response toResponse(Exception exception) {
-        LOG.error("Unhandled exception caught", exception);
+        LOG.error( exception.getMessage(), exception);
         return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
                 .entity("An unexpected error occurred. Please try again later.")
                 .build();

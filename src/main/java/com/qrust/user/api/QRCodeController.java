@@ -67,7 +67,7 @@ public class QRCodeController {
     @Path("/{id}")
     @Authenticated
     public Response get(@PathParam("id") UUID id) {
-        QRCode qrCode = qrCodeService.getQr(id);
+        QRCode qrCode = qrCodeService.getQrAuthorisedCode(id);
         if (qrCode == null) return Response.status(Response.Status.NOT_FOUND).build();
         return Response.ok(qrCodeService.toResponse(qrCode)).build();
     }

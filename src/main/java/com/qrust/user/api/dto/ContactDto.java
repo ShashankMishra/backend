@@ -2,12 +2,15 @@ package com.qrust.user.api.dto;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
+import lombok.Builder;
 import lombok.Data;
 
+import java.util.Date;
+
 @Data
+@Builder
 public class ContactDto {
-    @NotBlank
-    @Size(min = 1, max = 20)
+
     private String name;
 
 
@@ -15,5 +18,7 @@ public class ContactDto {
     @NotBlank
     @Size(min = 10, max = 10)
     private String phoneNumber;
+
+    private Date createdAt;
 }
 

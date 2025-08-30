@@ -3,8 +3,8 @@ package com.qrust.common.redis;
 import io.vertx.redis.client.RedisAPI;
 import io.vertx.redis.client.Response;
 import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Inject;
 import lombok.RequiredArgsConstructor;
+import org.eclipse.microprofile.config.inject.ConfigProperty;
 
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
@@ -13,8 +13,10 @@ import java.util.concurrent.ThreadLocalRandom;
 @ApplicationScoped
 public class RedisService {
 
-    @Inject
-    RedisAPI redisAPI;
+    private final RedisAPI redisAPI;
+
+    @ConfigProperty(name = "rate.limit.ttl.seconds", defaultValue = "120")
+    Integer rateLimitTtlSeconds;
 
     private static final int TTL_SECONDS = 600;
     private static final int MAX_RETRIES = 5;
@@ -27,22 +29,26 @@ public class RedisService {
             local ttl = tonumber(ARGV[1])
             local contactNumber = ARGV[2]
             local extension = ARGV[3]
-
+            
             local existingExtension = redis.call("GET", contactKey)
             if existingExtension then
                 redis.call("EXPIRE", contactKey, ttl)
                 redis.call("EXPIRE", extensionKey, ttl)
                 return existingExtension
             end
-
+            
             if redis.call("EXISTS", extensionKey) == 1 then
                 return nil
             end
-
+            
             redis.call("SET", contactKey, extension, "EX", ttl)
             redis.call("SET", extensionKey, contactNumber, "EX", ttl)
             return extension
             """;
+
+    public RedisAPI getRedisAPI() {
+        return redisAPI;
+    }
 
     public String getOrCreateExtension(String contactNumber) {
         for (int i = 0; i < MAX_RETRIES; i++) {
@@ -121,4 +127,23 @@ public class RedisService {
     private String generateRandom6DigitExtension() {
         return String.format("%06d", ThreadLocalRandom.current().nextInt(0, 1_000_000));
     }
+
+    public long incrementAndGetCount(String callFrom, String callTo) {
+        String key = String.format("rate_limit:%s:%s", callFrom, callTo);
+        try {
+            Response response = redisAPI.incr(key).toCompletionStage().toCompletableFuture().get();
+            if (response != null) {
+                long count = response.toLong();
+                if (count == 1) {
+                    redisAPI.expire(List.of(key, String.valueOf(rateLimitTtlSeconds)));
+                }
+                return count;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return 0;
+    }
+
+
 }

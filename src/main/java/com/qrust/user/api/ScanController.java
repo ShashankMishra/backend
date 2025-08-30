@@ -3,6 +3,7 @@ package com.qrust.user.api;
 import com.qrust.common.domain.QRCode;
 import com.qrust.common.domain.ScanHistory;
 import com.qrust.user.api.dto.LocationRequest;
+import com.qrust.user.service.CallService;
 import com.qrust.user.service.QRCodeService;
 import com.qrust.user.service.ScanService;
 import io.quarkus.security.Authenticated;
@@ -13,6 +14,7 @@ import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import lombok.extern.slf4j.Slf4j;
+import org.eclipse.microprofile.config.inject.ConfigProperty;
 
 import java.time.Instant;
 import java.util.List;
@@ -28,6 +30,12 @@ public class ScanController {
 
     @Inject
     QRCodeService qrCodeService;
+    @Inject
+    CallService callService;
+
+    @Inject
+    @ConfigProperty(name = "masking.enabled")
+    boolean maskingEnabled;
 
     @GET
     @Path("/{scanId}")
@@ -42,6 +50,10 @@ public class ScanController {
             return Response.status(Response.Status.PRECONDITION_FAILED).build();
         }
         QRCode qrCode = qrCodeService.getQr(scanHistory.getQrId());
+        if(maskingEnabled) {
+            qrCode = callService.getMaskedNumberForQr(qrCode);
+        }
+
         return Response.ok(qrCodeService.toResponse(qrCode)).build();
     }
 
