@@ -14,6 +14,7 @@ import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import lombok.extern.slf4j.Slf4j;
+import org.eclipse.microprofile.config.inject.ConfigProperty;
 
 import java.time.Instant;
 import java.util.List;
@@ -32,6 +33,10 @@ public class ScanController {
     @Inject
     CallService callService;
 
+    @Inject
+    @ConfigProperty(name = "masking.enabled")
+    boolean maskingEnabled;
+
     @GET
     @Path("/{scanId}")
     @PermitAll
@@ -45,7 +50,9 @@ public class ScanController {
             return Response.status(Response.Status.PRECONDITION_FAILED).build();
         }
         QRCode qrCode = qrCodeService.getQr(scanHistory.getQrId());
-        qrCode = callService.getMaskedNumberForQr(qrCode);
+        if(maskingEnabled) {
+            qrCode = callService.getMaskedNumberForQr(qrCode);
+        }
 
         return Response.ok(qrCodeService.toResponse(qrCode)).build();
     }
