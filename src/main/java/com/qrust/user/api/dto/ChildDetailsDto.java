@@ -7,6 +7,8 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
 
+import java.util.Set;
+
 @Data
 public class ChildDetailsDto implements QRDetailsDto {
     @NotNull
@@ -23,5 +25,10 @@ public class ChildDetailsDto implements QRDetailsDto {
     private ContactDto emergencyContact;
     @Valid
     private MedicalDetailsDto medicalDetails;
+
+    @Override
+    public Set<ContactDto> getContactList() {
+        return Set.of(schoolContact, emergencyContact);
+    }
 }
 

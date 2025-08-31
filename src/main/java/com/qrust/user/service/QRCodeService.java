@@ -1,6 +1,7 @@
 package com.qrust.user.service;
 
 import com.qrust.common.ShortNumericIdGenerator;
+import com.qrust.common.domain.Contact;
 import com.qrust.common.domain.QRCode;
 import com.qrust.common.domain.QRStatus;
 import com.qrust.common.domain.User;
@@ -14,10 +15,14 @@ import jakarta.annotation.security.RolesAllowed;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import org.apache.commons.codec.digest.DigestUtils;
+import org.jetbrains.annotations.NotNull;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Objects;
+import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import static com.qrust.common.domain.QRStatus.ACTIVE;
 
@@ -45,6 +50,7 @@ public class QRCodeService {
         if (getAllQrs().stream().filter(qr -> qr.getStatus() == ACTIVE).toList().size() >= limitService.getQrCreationLimitForUser()) {
             throw new LimitReachedException("QR code limit reached, More QR codes not allowed for this account.");
         }
+        validateQrDetails(req);
         QRCode entity = toEntity(req);
         entity.setId(UUID.randomUUID());
         entity.setShortId(ShortNumericIdGenerator.generate());
@@ -63,10 +69,16 @@ public class QRCodeService {
         // get qrcode from repo and then anyone can update QR if it is unassigned status otherwise only owner can update
         QRCode qrCode = getQrAuthorisedCode(qrId);
         if (qrCode == null) return null;
+
+        validateQrDetails(req);
+
+
         updateQrDetails(qrCode, req);
         qrCodeRepository.save(qrCode);
         return qrCode;
     }
+
+
 
     public QRCode claimQR(QRCode qrCode) {
         qrCode.setStatus(ACTIVE);
@@ -193,5 +205,20 @@ public class QRCodeService {
         QRCode qrCode = getQr(qrCodeId);
         qrCode.setPremium(true);
         qrCodeRepository.save(qrCode);
+    }
+
+    private void validateQrDetails(QRCodeRequest req) {
+
+        List<Contact> verifiedContacts = userService.getCurrentUserInfo().getContacts();
+        Set<String> verifiedPhoneNumbers = verifiedContacts.stream()
+                .map(Contact::getPhoneNumber)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toSet());
+
+        req.getContactList().forEach(contact -> {
+            if (!(contact.getPhoneNumber()==null || verifiedPhoneNumbers.contains(contact.getPhoneNumber()))) {
+                 throw new InvalidActionException("Contact with phone number " + contact.getPhoneNumber() + " is not verified.");
+            }
+        });
     }
 }

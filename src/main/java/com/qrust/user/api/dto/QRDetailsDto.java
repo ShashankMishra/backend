@@ -3,6 +3,8 @@ package com.qrust.user.api.dto;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 
+import java.util.Set;
+
 @JsonTypeInfo(
         use = JsonTypeInfo.Id.NAME,
         include = JsonTypeInfo.As.PROPERTY,
@@ -15,5 +17,10 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
         @JsonSubTypes.Type(value = LuggageDetailsDto.class, name = "LUGGAGE"),
         @JsonSubTypes.Type(value = LockscreenDetailsDto.class, name = "LOCKSCREEN"),
 })
-public interface QRDetailsDto {}
+public interface QRDetailsDto {
+
+    Set<ContactDto> getContactList();
+}
+
+
 

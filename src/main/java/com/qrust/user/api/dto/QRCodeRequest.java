@@ -6,6 +6,8 @@ import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
+import java.util.Set;
+
 @Data
 @AllArgsConstructor
 public class QRCodeRequest {
@@ -16,5 +18,9 @@ public class QRCodeRequest {
     // Use DTO subtypes for details
     @Valid
     private QRDetailsDto details;
+
+    public Set<ContactDto> getContactList() {
+        return details.getContactList();
+    }
 
 }
