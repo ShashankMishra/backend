@@ -7,6 +7,7 @@ import lombok.RequiredArgsConstructor;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 
 import java.util.List;
+import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
 
 @RequiredArgsConstructor
@@ -29,8 +30,9 @@ public class RedisService {
             local ttl = tonumber(ARGV[1])
             local contactNumber = ARGV[2]
             local extension = ARGV[3]
+            local qrId = ARGV[4]
             
-            local existingExtension = redis.call("GET", contactKey)
+            local existingExtension = redis.call("HGET", contactKey, "extension")
             if existingExtension then
                 redis.call("EXPIRE", contactKey, ttl)
                 redis.call("EXPIRE", extensionKey, ttl)
@@ -41,8 +43,10 @@ public class RedisService {
                 return nil
             end
             
-            redis.call("SET", contactKey, extension, "EX", ttl)
-            redis.call("SET", extensionKey, contactNumber, "EX", ttl)
+            redis.call("HSET", contactKey, "extension", extension, "qrId", qrId)
+            redis.call("EXPIRE", contactKey, ttl)
+            redis.call("HSET", extensionKey, "contactNumber", contactNumber, "qrId", qrId)
+            redis.call("EXPIRE", extensionKey, ttl)
             return extension
             """;
 
@@ -50,7 +54,7 @@ public class RedisService {
         return redisAPI;
     }
 
-    public String getOrCreateExtension(String contactNumber) {
+    public String getOrCreateExtension(String contactNumber, UUID qrId) {
         for (int i = 0; i < MAX_RETRIES; i++) {
             String extension = generateRandom6DigitExtension();
             String contactKey = String.format("contact:{%s}:%s", SHARED_TAG, contactNumber);
@@ -64,7 +68,8 @@ public class RedisService {
                         extensionKey,
                         String.valueOf(TTL_SECONDS),
                         contactNumber,
-                        extension
+                        extension,
+                        qrId.toString()
                 )).toCompletionStage().toCompletableFuture().get();
 
                 if (response != null && !response.toString().equalsIgnoreCase("null")) {
@@ -83,7 +88,7 @@ public class RedisService {
         String extensionKey = String.format("extension:{%s}:%s", SHARED_TAG, extension);
 
         try {
-            Response response = redisAPI.get(extensionKey).toCompletionStage().toCompletableFuture().get();
+            Response response = redisAPI.hget(extensionKey, "contactNumber").toCompletionStage().toCompletableFuture().get();
 
             if (response != null && !"null".equalsIgnoreCase(response.toString())) {
                 return response.toString();
@@ -96,15 +101,18 @@ public class RedisService {
         return null;
     }
 
-    public void storeSidToContact(String sid, String contactNumber) {
+    public void storeSidToContactAndQrId(String sid, String contactNumber, String qrId) {
         String key = "sid:" + sid;
         try {
-            redisAPI.set(List.of(
-                    key,
-                    contactNumber,
-                    "EX", // TTL flag
-                    String.valueOf(TTL_SECONDS)
-            )).toCompletionStage().toCompletableFuture().get();
+            if (qrId != null) {
+                redisAPI.hset(List.of(key, "contactNumber", contactNumber, "qrId", qrId))
+                        .toCompletionStage().toCompletableFuture().get();
+            } else {
+                redisAPI.hset(List.of(key, "contactNumber", contactNumber))
+                        .toCompletionStage().toCompletableFuture().get();
+            }
+            redisAPI.expire(List.of(key, String.valueOf(TTL_SECONDS)))
+                    .toCompletionStage().toCompletableFuture().get();
         } catch (Exception e) {
             e.printStackTrace(); // Handle properly
         }
@@ -113,14 +121,39 @@ public class RedisService {
     public String getContactNumberBySid(String sid) {
         String key = "sid:" + sid;
         try {
-            Response response = redisAPI.get(key).toCompletionStage().toCompletableFuture().get();
+            Response response = redisAPI.hget(key, "contactNumber").toCompletionStage().toCompletableFuture().get();
             if (response != null && !"null".equalsIgnoreCase(response.toString())) {
                 return response.toString();
             }
         } catch (Exception e) {
             e.printStackTrace();
         }
+        return null;
+    }
 
+    public String getQrIdBySid(String sid) {
+        String key = "sid:" + sid;
+        try {
+            Response response = redisAPI.hget(key, "qrId").toCompletionStage().toCompletableFuture().get();
+            if (response != null && !"null".equalsIgnoreCase(response.toString())) {
+                return response.toString();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    public String getQrIdByExtension(String extension) {
+        String extensionKey = String.format("extension:{%s}:%s", SHARED_TAG, extension);
+        try {
+            Response response = redisAPI.hget(extensionKey, "qrId").toCompletionStage().toCompletableFuture().get();
+            if (response != null && !"null".equalsIgnoreCase(response.toString())) {
+                return response.toString();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         return null;
     }
 

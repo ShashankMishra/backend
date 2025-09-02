@@ -1,18 +1,17 @@
 package com.qrust.user.api;
 
+import com.qrust.common.domain.CallHistory;
 import com.qrust.common.redis.RedisService;
+import com.qrust.user.service.CallHistoryService;
 import jakarta.annotation.security.PermitAll;
 import jakarta.inject.Inject;
-import jakarta.ws.rs.GET;
-import jakarta.ws.rs.Path;
-import jakarta.ws.rs.Produces;
-import jakarta.ws.rs.QueryParam;
-import jakarta.ws.rs.WebApplicationException;
+import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 
+import java.time.Instant;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -24,6 +23,9 @@ public class ExotelWebhookController {
 
     @Inject
     RedisService redisService;
+
+    @Inject
+    CallHistoryService callHistoryService;
 
     @ConfigProperty(name = "rate.limit.max.requests", defaultValue = "5")
     Integer rateLimitMaxRequests;
@@ -39,9 +41,11 @@ public class ExotelWebhookController {
             throw new WebApplicationException("Rate limit exceeded for this number combination", Response.Status.TOO_MANY_REQUESTS);
         }
 
-        String contactNumber = redisService.getContactNumberByExtension(digits.replace("\"", ""));
-        log.info("Found contact number: {} for extension: {}", contactNumber, digits);
-        redisService.storeSidToContact(callSid, contactNumber);
+        String extractedDigits = digits.replace("\"", "");
+        String contactNumber = redisService.getContactNumberByExtension(extractedDigits);
+        String qrId = redisService.getQrIdByExtension(extractedDigits);
+        log.info("Found contact number: {} and qrId: {} for extension: {}", contactNumber, qrId, digits);
+        redisService.storeSidToContactAndQrId(callSid, contactNumber, qrId);
         return Response.ok().build();
     }
 
@@ -49,10 +53,24 @@ public class ExotelWebhookController {
     @PermitAll
     @Path("/connect")
     @Produces(MediaType.APPLICATION_JSON)
-    public Response connect(@QueryParam("CallSid") String callSid) {
+    public Response connect(@QueryParam("CallSid") String callSid, @QueryParam("CallFrom") String callFrom) {
         log.info("Received connect webhook from Exotel for CallSid: {}", callSid);
         String contactNumber = redisService.getContactNumberBySid(callSid);
         log.info("Found contact number: {} for CallSid: {}", contactNumber, callSid);
+
+        //TODO: should we implement it asynchronously so that we don't fail the call flow if DB is down?
+        String qrId = redisService.getQrIdBySid(callSid);
+        if (qrId != null && contactNumber != null && callFrom != null) {
+            CallHistory callHistory = CallHistory.builder()
+                    .qrId(qrId)
+                    .contactNumber(contactNumber)
+                    .callFrom(callFrom)
+                    .callSid(callSid)
+                    .timestamp(Instant.now())
+                    .build();
+            callHistoryService.save(callHistory);
+        }
+
         Map<String, Object> response = new LinkedHashMap<>();
         response.put("fetch_after_attempt", false);
 

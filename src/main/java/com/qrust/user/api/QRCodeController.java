@@ -2,10 +2,12 @@ package com.qrust.user.api;
 
 import com.qrust.common.domain.QRCode;
 import com.qrust.common.domain.ScanHistory;
+import com.qrust.user.api.dto.CallHistoryResponse;
 import com.qrust.user.api.dto.ClaimRequest;
 import com.qrust.user.api.dto.QRCodeRequest;
 import com.qrust.user.api.dto.QRCodeResponse;
 import com.qrust.user.exceptions.LimitReachedException;
+import com.qrust.user.service.CallHistoryService;
 import com.qrust.user.service.ClaimService;
 import com.qrust.user.service.QRCodeService;
 import com.qrust.user.service.ScanService;
@@ -40,6 +42,8 @@ public class QRCodeController {
     @Inject
     ClaimService claimService;
 
+    @Inject
+    CallHistoryService callHistoryService;
 
     @ConfigProperty(name = "app.frontend.uri")
     String frontendUri;
@@ -169,6 +173,14 @@ public class QRCodeController {
 
         claimService.verifyClaim(id, request.getCode());
         return Response.ok().build();
+    }
+
+    @GET
+    @Path("/{qrId}/call-history")
+    @Authenticated
+    public Response getCallHistory(@PathParam("qrId") UUID qrId) {
+        List<CallHistoryResponse> callHistory = callHistoryService.findByQrId(qrId);
+        return Response.ok(callHistory).build();
     }
 
     private ScanHistory createScanHistory(UUID qrId, HttpHeaders headers, RoutingContext rc) {

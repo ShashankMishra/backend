@@ -90,4 +90,28 @@ aws dynamodb create-table \
     --endpoint-url $ENDPOINT_URL \
     --region $REGION || true
 
+aws dynamodb create-table \
+  --table-name callHistory \
+  --attribute-definitions \
+      AttributeName=qrId,AttributeType=S \
+      AttributeName=timestamp,AttributeType=S \
+      AttributeName=contactNumber,AttributeType=S \
+  --key-schema \
+      AttributeName=qrId,KeyType=HASH \
+      AttributeName=timestamp,KeyType=RANGE \
+  --global-secondary-indexes '[
+    {
+      "IndexName": "contactNumber-timestamp-index",
+      "KeySchema": [
+        {"AttributeName":"contactNumber","KeyType":"HASH"},
+        {"AttributeName":"timestamp","KeyType":"RANGE"}
+      ],
+      "Projection":{"ProjectionType":"ALL"},
+      "ProvisionedThroughput":{"ReadCapacityUnits":5,"WriteCapacityUnits":5}
+    }
+  ]' \
+  --provisioned-throughput ReadCapacityUnits=5,WriteCapacityUnits=5 \
+  --endpoint-url $ENDPOINT_URL \
+  --region $REGION || true
+
 echo "Tables created in local DynamoDB."
