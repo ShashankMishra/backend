@@ -35,6 +35,10 @@
         {
           "valueFrom": "arn:aws:secretsmanager:ap-south-1:947931883961:secret:message-central-prod-OD5vQX:MESSAGE_CENTRAL_AUTH_TOKEN::",
           "name": "MESSAGE_CENTRAL_AUTH_TOKEN"
+        },
+        {
+          "valueFrom": "arn:aws:secretsmanager:ap-south-1:947931883961:secret:meta-secret-prod-TCQ7Ca:WA_SYSTEM_USER_TOKEN::",
+          "name": "WA_SYSTEM_USER_TOKEN"
         }
       ],
       "cpu": 512,

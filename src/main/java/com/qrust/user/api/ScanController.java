@@ -6,6 +6,7 @@ import com.qrust.user.api.dto.LocationRequest;
 import com.qrust.user.service.CallService;
 import com.qrust.user.service.QRCodeService;
 import com.qrust.user.service.ScanService;
+import com.qrust.user.service.WhatsappMessageService;
 import io.quarkus.security.Authenticated;
 import jakarta.annotation.security.PermitAll;
 import jakarta.inject.Inject;
@@ -19,6 +20,7 @@ import org.eclipse.microprofile.config.inject.ConfigProperty;
 import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 
 @Path("/scans")
 @Produces(MediaType.APPLICATION_JSON)
@@ -32,6 +34,9 @@ public class ScanController {
     QRCodeService qrCodeService;
     @Inject
     CallService callService;
+
+    @Inject
+    WhatsappMessageService whatsappMessageService;
 
     @Inject
     @ConfigProperty(name = "masking.enabled")
@@ -53,6 +58,9 @@ public class ScanController {
         if(maskingEnabled) {
             qrCode = callService.getMaskedNumberForQr(qrCode);
         }
+
+        QRCode finalQrCode = qrCode;
+        CompletableFuture.runAsync(() -> whatsappMessageService.sendMessageOnScan(finalQrCode));
 
         return Response.ok(qrCodeService.toResponse(qrCode)).build();
     }
