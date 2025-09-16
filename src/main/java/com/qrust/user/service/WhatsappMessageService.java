@@ -10,6 +10,7 @@ import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.eclipse.microprofile.rest.client.inject.RestClient;
 
 import java.util.List;
+import java.util.UUID;
 
 @ApplicationScoped
 @Slf4j
@@ -19,14 +20,22 @@ public class WhatsappMessageService {
     @RestClient
     private WhatsappClient whatsappClient;
 
+    @Inject
+    ScanService scanService;
+
     @ConfigProperty(name = "whatsapp.system.user.token")
     String systemUserToken;
 
     @ConfigProperty(name = "whatsapp.phone.number.id")
     String phoneNumberId;
 
-    public void sendMessageOnScan(QRCode qrCode) {
+    public void sendMessageOnScan(QRCode qrCode, UUID scanId) {
         log.info("Sending whatsapp message for qr code scan: {}", qrCode.getId());
+
+        ScanHistory scan = scanService.getScan(scanId);
+
+        String latitude = scan.getLocation().getLatitude().toString();
+        String longitude = scan.getLocation().getLongitude().toString();
 
         Contact ownerContact = getOwnerContact(qrCode);
 
@@ -56,7 +65,7 @@ public class WhatsappMessageService {
                                 .subType("url")
                                 .index(0)
                                 .parameters(List.of(
-                                        WhatsappRequest.Parameter.builder().type("text").text("https://qrust.in").build()
+                                        WhatsappRequest.Parameter.builder().type("text").text(latitude + "," + longitude).build()
                                 ))
                                 .build()
                 ))

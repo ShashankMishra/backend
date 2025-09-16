@@ -60,7 +60,7 @@ public class ScanController {
         }
 
         QRCode finalQrCode = qrCode;
-        CompletableFuture.runAsync(() -> whatsappMessageService.sendMessageOnScan(finalQrCode));
+        CompletableFuture.runAsync(() -> whatsappMessageService.sendMessageOnScan(finalQrCode, scanId));
 
         return Response.ok(qrCodeService.toResponse(qrCode)).build();
     }
