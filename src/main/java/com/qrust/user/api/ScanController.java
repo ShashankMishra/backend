@@ -50,7 +50,6 @@ public class ScanController {
 
     private final ObjectMapper objectMapper = JsonUtil.createMapper();
 
-
     @GET
     @Path("/{scanId}")
     @PermitAll
@@ -64,8 +63,9 @@ public class ScanController {
             return Response.status(Response.Status.PRECONDITION_FAILED).build();
         }
         QRCode qrCode = qrCodeService.getQr(scanHistory.getQrId());
+        QRCode maskedQrCode = qrCode;
         if (maskingEnabled) {
-            qrCode = callService.getMaskedNumberForQr(qrCode);
+            maskedQrCode = callService.getMaskedNumberForQr(qrCode);
         }
 
         try {
@@ -75,7 +75,7 @@ public class ScanController {
             log.error("Failed to enqueue whatsapp message", e);
         }
 
-        return Response.ok(qrCodeService.toResponse(qrCode)).build();
+        return Response.ok(qrCodeService.toResponse(maskedQrCode)).build();
     }
 
     @Data

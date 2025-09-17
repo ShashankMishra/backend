@@ -5,7 +5,6 @@ import com.qrust.common.JsonUtil;
 import com.qrust.user.api.ScanController;
 import io.quarkus.redis.client.RedisClient;
 import io.quarkus.scheduler.Scheduled;
-import jakarta.annotation.PostConstruct;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
@@ -29,15 +28,6 @@ public class WhatsappMessageConsumer {
     WhatsappMessageService whatsappMessageService;
 
     private final ObjectMapper objectMapper = JsonUtil.createMapper();
-
-    @PostConstruct
-    void checkRedisKeyTypes() {
-        log.info("Checking Redis key types...");
-        log.info("Type of '{}': {}", QUEUE_NAME, redisClient.type(QUEUE_NAME));
-        log.info("Type of '{}': {}", PROCESSING_QUEUE_NAME, redisClient.type(PROCESSING_QUEUE_NAME));
-        log.info("Type of '{}': {}", SCHEDULED_QUEUE_NAME, redisClient.type(SCHEDULED_QUEUE_NAME));
-        log.info("Type of '{}': {}", DEAD_LETTER_QUEUE_NAME, redisClient.type(DEAD_LETTER_QUEUE_NAME));
-    }
 
     @Scheduled(every = "5s")
     void moveScheduledMessages() {

@@ -19,34 +19,37 @@ public class CallService {
 
     public QRCode getMaskedNumberForQr(QRCode qrCode) {
 
-        switch (qrCode.getType()) {
+        var detailsJson = qrCode.getDetails().toJson();
+        var details = QRDetails.fromJson(detailsJson);
+        var qrCodeCopy = new QRCode(qrCode.getId(), qrCode.getShortId(), qrCode.getStatus(), qrCode.getCreatedAt(), qrCode.getType(), qrCode.getOwner(), qrCode.getCreatedBy(), details, qrCode.isPublic(), qrCode.getAccessCode(), qrCode.isPremium());
+
+        switch (qrCodeCopy.getType()) {
             case VEHICLE -> {
-                var vehicleDetails = ((VehicleDetails) qrCode.getDetails());
-                vehicleDetails.getEmergencyContact().setPhoneNumber(getVirtualNumber(vehicleDetails.getEmergencyContact().getPhoneNumber(), qrCode.getId()));
-                vehicleDetails.getOwnerContact().setPhoneNumber(getVirtualNumber(vehicleDetails.getOwnerContact().getPhoneNumber(), qrCode.getId()));
+                var vehicleDetails = ((VehicleDetails) qrCodeCopy.getDetails());
+                vehicleDetails.getEmergencyContact().setPhoneNumber(getVirtualNumber(vehicleDetails.getEmergencyContact().getPhoneNumber(), qrCodeCopy.getId()));
+                vehicleDetails.getOwnerContact().setPhoneNumber(getVirtualNumber(vehicleDetails.getOwnerContact().getPhoneNumber(), qrCodeCopy.getId()));
             }
             case CHILD -> {
-                var childDetails = ((ChildDetails) qrCode.getDetails());
-                childDetails.getEmergencyContact().setPhoneNumber(getVirtualNumber(childDetails.getEmergencyContact().getPhoneNumber(), qrCode.getId()));
+                var childDetails = ((ChildDetails) qrCodeCopy.getDetails());
+                childDetails.getEmergencyContact().setPhoneNumber(getVirtualNumber(childDetails.getEmergencyContact().getPhoneNumber(), qrCodeCopy.getId()));
             }
             case LUGGAGE -> {
-                var luggageDetails = ((LuggageDetails) qrCode.getDetails());
-                luggageDetails.getEmergencyContact().setPhoneNumber(getVirtualNumber(luggageDetails.getEmergencyContact().getPhoneNumber(), qrCode.getId()));
-                luggageDetails.getOwnerContact().setPhoneNumber(getVirtualNumber(luggageDetails.getOwnerContact().getPhoneNumber(), qrCode.getId()));
+                var luggageDetails = ((LuggageDetails) qrCodeCopy.getDetails());
+                luggageDetails.getEmergencyContact().setPhoneNumber(getVirtualNumber(luggageDetails.getEmergencyContact().getPhoneNumber(), qrCodeCopy.getId()));
+                luggageDetails.getOwnerContact().setPhoneNumber(getVirtualNumber(luggageDetails.getOwnerContact().getPhoneNumber(), qrCodeCopy.getId()));
 
             }
             case LOCKSCREEN -> {
-                var lockscreenDetails = ((LockscreenDetails) qrCode.getDetails());
-                lockscreenDetails.getEmergencyContact().setPhoneNumber(getVirtualNumber(lockscreenDetails.getEmergencyContact().getPhoneNumber(), qrCode.getId()));
-                lockscreenDetails.getOwnerContact().setPhoneNumber(getVirtualNumber(lockscreenDetails.getOwnerContact().getPhoneNumber(), qrCode.getId()));
+                var lockscreenDetails = ((LockscreenDetails) qrCodeCopy.getDetails());
+                lockscreenDetails.getEmergencyContact().setPhoneNumber(getVirtualNumber(lockscreenDetails.getEmergencyContact().getPhoneNumber(), qrCodeCopy.getId()));
+                lockscreenDetails.getOwnerContact().setPhoneNumber(getVirtualNumber(lockscreenDetails.getOwnerContact().getPhoneNumber(), qrCodeCopy.getId()));
             }
             case PERSON -> {
-                var personDetails = ((PersonDetails) qrCode.getDetails());
-                personDetails.getEmergencyContact().setPhoneNumber(getVirtualNumber(personDetails.getEmergencyContact().getPhoneNumber(), qrCode.getId()));
+                var personDetails = ((PersonDetails) qrCodeCopy.getDetails());
+                personDetails.getEmergencyContact().setPhoneNumber(getVirtualNumber(personDetails.getEmergencyContact().getPhoneNumber(), qrCodeCopy.getId()));
             }
         }
-        return qrCode;
-
+        return qrCodeCopy;
     }
 
     private String getVirtualNumber(String contactNumber, UUID qrId) {
