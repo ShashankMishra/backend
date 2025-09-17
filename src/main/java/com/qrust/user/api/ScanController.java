@@ -1,12 +1,14 @@
 package com.qrust.user.api;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.qrust.common.JsonUtil;
 import com.qrust.common.domain.QRCode;
 import com.qrust.common.domain.ScanHistory;
+import com.qrust.common.queue.RedisQueueService;
 import com.qrust.user.api.dto.LocationRequest;
 import com.qrust.user.service.CallService;
 import com.qrust.user.service.QRCodeService;
 import com.qrust.user.service.ScanService;
-import com.qrust.user.service.WhatsappMessageService;
 import io.quarkus.security.Authenticated;
 import jakarta.annotation.security.PermitAll;
 import jakarta.inject.Inject;
@@ -14,13 +16,15 @@ import jakarta.validation.Valid;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 
 import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
-import java.util.concurrent.CompletableFuture;
 
 @Path("/scans")
 @Produces(MediaType.APPLICATION_JSON)
@@ -36,11 +40,14 @@ public class ScanController {
     CallService callService;
 
     @Inject
-    WhatsappMessageService whatsappMessageService;
+    RedisQueueService redisQueueService;
 
     @Inject
     @ConfigProperty(name = "masking.enabled")
     boolean maskingEnabled;
+
+    private final ObjectMapper objectMapper = JsonUtil.createMapper();
+
 
     @GET
     @Path("/{scanId}")
@@ -55,14 +62,27 @@ public class ScanController {
             return Response.status(Response.Status.PRECONDITION_FAILED).build();
         }
         QRCode qrCode = qrCodeService.getQr(scanHistory.getQrId());
-        if(maskingEnabled) {
+        if (maskingEnabled) {
             qrCode = callService.getMaskedNumberForQr(qrCode);
         }
 
-        QRCode finalQrCode = qrCode;
-        CompletableFuture.runAsync(() -> whatsappMessageService.sendMessageOnScan(finalQrCode, scanId));
+        try {
+            String message = objectMapper.writeValueAsString(new ScanMessage(qrCode, scanId, 0));
+            redisQueueService.enqueueWithDelay("whatsapp_messages_scheduled", message);
+        } catch (Exception e) {
+            log.error("Failed to enqueue whatsapp message", e);
+        }
 
         return Response.ok(qrCodeService.toResponse(qrCode)).build();
+    }
+
+    @Data
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class ScanMessage {
+        private QRCode qrCode;
+        private UUID scanId;
+        private int retryCount;
     }
 
     @PUT
