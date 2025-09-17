@@ -15,6 +15,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.eclipse.microprofile.rest.client.inject.RestClient;
 
 import java.time.Instant;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -58,8 +59,11 @@ public class ScanService {
         }
         // if scan history already exists based on ip address and qrId within last 1 min then return existing history
         ScanHistory finalHistory = history;
-        Optional<ScanHistory> existingHistory = scanHistoryForQr.stream().filter(h -> h.getScannerIp().equals(finalHistory.getScannerIp()) && h.getQrId().equals(finalHistory.getQrId()))
-                .findFirst();
+        Optional<ScanHistory> existingHistory = scanHistoryForQr.stream()
+                .filter(h -> h.getScannerIp().equals(finalHistory.getScannerIp())
+                        && h.getQrId().equals(finalHistory.getQrId()))
+                .max(Comparator.comparing(ScanHistory::getScanTimestamp));
+
 
         if (existingHistory.isPresent() && existingHistory.get().getScanTimestamp().isAfter(history.getScanTimestamp().minusSeconds(60))) {
             log.info("Scan history already exists for IP: {} and QR ID: {} within the last minute. Returning existing history.",
