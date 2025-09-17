@@ -43,16 +43,16 @@ public class WhatsappMessageConsumer {
 
     @Scheduled(every = "10s")
     void consumeMessage() {
-        io.vertx.redis.client.Response response = redisClient.rpoplpush(QUEUE_NAME, PROCESSING_QUEUE_NAME);
-        if (response != null) {
-            String message = response.toString();
+        io.vertx.redis.client.Response response;
+        while ((response = redisClient.rpoplpush(QUEUE_NAME, PROCESSING_QUEUE_NAME)) != null) {
+            final String message = response.toString();
             try {
                 ScanController.ScanMessage scanMessage = objectMapper.readValue(message, ScanController.ScanMessage.class);
                 whatsappMessageService.sendMessageOnScan(scanMessage.getQrCode(), scanMessage.getScanId());
-                redisClient.lrem(PROCESSING_QUEUE_NAME, "1", message);
             } catch (Exception e) {
                 log.error("Failed to process message: {}", message, e);
                 handleFailedMessage(message);
+            } finally {
                 redisClient.lrem(PROCESSING_QUEUE_NAME, "1", message);
             }
         }
