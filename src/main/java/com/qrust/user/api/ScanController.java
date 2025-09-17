@@ -26,6 +26,8 @@ import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 
+import static com.qrust.Constants.SCHEDULED_QUEUE_NAME;
+
 @Path("/scans")
 @Produces(MediaType.APPLICATION_JSON)
 @Slf4j
@@ -68,7 +70,7 @@ public class ScanController {
 
         try {
             String message = objectMapper.writeValueAsString(new ScanMessage(qrCode, scanId, 0));
-            redisQueueService.enqueueWithDelay("whatsapp_messages_scheduled", message);
+            redisQueueService.enqueueWithDelay(SCHEDULED_QUEUE_NAME, message);
         } catch (Exception e) {
             log.error("Failed to enqueue whatsapp message", e);
         }

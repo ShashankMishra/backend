@@ -5,22 +5,20 @@ import com.qrust.common.JsonUtil;
 import com.qrust.user.api.ScanController;
 import io.quarkus.redis.client.RedisClient;
 import io.quarkus.scheduler.Scheduled;
+import jakarta.annotation.PostConstruct;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
 
 import java.time.Instant;
 import java.util.Arrays;
 
+import static com.qrust.Constants.*;
+
 @ApplicationScoped
 @Slf4j
 public class WhatsappMessageConsumer {
 
-    private static final String QUEUE_NAME = "whatsapp_messages";
-    private static final String PROCESSING_QUEUE_NAME = "whatsapp_messages_processing";
-    private static final String SCHEDULED_QUEUE_NAME = "whatsapp_messages_scheduled";
-    private static final String DEAD_LETTER_QUEUE_NAME = "whatsapp_messages_dlq";
     private static final int MAX_RETRIES = 3;
     private static final int DELAY_SECONDS = 15;
 
