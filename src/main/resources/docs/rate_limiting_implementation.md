@@ -104,7 +104,17 @@ public class GreetingResource {
 
 ## Redis Data Structure
 
-The rate limiting implementation uses a Redis sorted set to store the timestamps of requests. The key of the sorted set is a combination of the rate limiting type (user or IP), the user ID or IP address, and the method name.
+The rate limiting implementation uses a Redis sorted set to store the timestamps of requests. The key of the sorted set is a combination of the rate limiting type (user or IP), the user ID or IP address, and a unique method signature.
+
+The key format is as follows:
+
+`rate-limit:<type>:<id>:<fully_qualified_class_name>#<method_name>(<parameter_types>)`
+
+For example:
+
+`rate-limit:ip:127.0.0.1:com.qrust.user.api.ScanController#get(java.util.UUID)`
+
+This key structure ensures that each method, including overloaded methods, has a unique rate-limiting key. It also avoids issues with CDI proxies by using the declaring class's canonical name.
 
 The value of each element in the sorted set is the timestamp of the request.
 

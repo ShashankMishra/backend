@@ -10,6 +10,9 @@ import jakarta.interceptor.InvocationContext;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.Serializable;
+import java.lang.reflect.Method;
+import java.util.stream.Collectors;
+import java.util.Arrays;
 
 @RateLimitByUser
 @Interceptor
@@ -31,7 +34,7 @@ public class RateLimitByUserInterceptor implements Serializable {
 
         log.info("Applying rate limiting for user: {}", userId);
 
-        String key = "rate-limit:user:" + userId + ":" + context.getMethod().getName();
+        String key = "rate-limit:user:" + userId + ":" + getMethodSignature(context.getMethod());
 
         long currentTime = System.currentTimeMillis();
         long windowStart = currentTime - windowSize * 1000L;
@@ -49,5 +52,13 @@ public class RateLimitByUserInterceptor implements Serializable {
         redisService.getRedisAPI().expire(java.util.List.of(key, String.valueOf(windowSize)));
 
         return context.proceed();
+    }
+
+    private String getMethodSignature(Method method) {
+        String methodName = method.getName();
+        String parameterTypes = Arrays.stream(method.getParameterTypes())
+                .map(Class::getCanonicalName)
+                .collect(Collectors.joining(","));
+        return method.getDeclaringClass().getCanonicalName() + "#" + methodName + "(" + parameterTypes + ")";
     }
 }
