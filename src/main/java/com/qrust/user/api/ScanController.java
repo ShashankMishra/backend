@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.qrust.common.JsonUtil;
 import com.qrust.common.domain.QRCode;
 import com.qrust.common.domain.ScanHistory;
+import com.qrust.common.interceptor.RateLimitByIp;
 import com.qrust.common.queue.RedisQueueService;
 import com.qrust.common.redis.RedisService;
 import com.qrust.user.api.dto.LocationRequest;
@@ -58,6 +59,7 @@ public class ScanController {
     @GET
     @Path("/{scanId}")
     @PermitAll
+    @RateLimitByIp(windowSize = 60, maxRequests = 10)
     public Response get(@PathParam("scanId") UUID scanId) {
         ScanHistory scanHistory = scanService.getScan(scanId);
         if (scanHistory == null) {
