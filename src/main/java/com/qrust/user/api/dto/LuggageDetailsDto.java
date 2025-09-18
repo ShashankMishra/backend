@@ -7,6 +7,7 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
 
+import java.util.HashSet;
 import java.util.Set;
 
 @Data
@@ -25,7 +26,10 @@ public class LuggageDetailsDto implements QRDetailsDto {
 
     @Override
     public Set<ContactDto> getContactList() {
-        return Set.of(ownerContact, emergencyContact);
+        Set<ContactDto> contacts = new HashSet<>();
+        contacts.add(ownerContact);
+        contacts.add(emergencyContact);
+        return contacts;
     }
 
 }
