@@ -2,7 +2,7 @@ package com.qrust.user.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.qrust.common.JsonUtil;
-import com.qrust.user.api.ScanController;
+import com.qrust.user.api.dto.ScanMessage;
 import io.quarkus.redis.client.RedisClient;
 import io.quarkus.scheduler.Scheduled;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -47,8 +47,8 @@ public class WhatsappMessageConsumer {
         while ((response = redisClient.rpoplpush(QUEUE_NAME, PROCESSING_QUEUE_NAME)) != null) {
             final String message = response.toString();
             try {
-                ScanController.ScanMessage scanMessage = objectMapper.readValue(message, ScanController.ScanMessage.class);
-                whatsappMessageService.sendMessageOnScan(scanMessage.getQrCode(), scanMessage.getScanId());
+                ScanMessage scanMessage = objectMapper.readValue(message, ScanMessage.class);
+                whatsappMessageService.sendMessageOnScan(scanMessage.getQrCode(), scanMessage.getScanId(), scanMessage.getOwnerName());
             } catch (Exception e) {
                 log.error("Failed to process message: {}", message, e);
                 handleFailedMessage(message);
@@ -72,7 +72,7 @@ public class WhatsappMessageConsumer {
 
     private void handleFailedMessage(String message) {
         try {
-            ScanController.ScanMessage scanMessage = objectMapper.readValue(message, ScanController.ScanMessage.class);
+            ScanMessage scanMessage = objectMapper.readValue(message, ScanMessage.class);
             int retryCount = scanMessage.getRetryCount();
             if (retryCount < MAX_RETRIES) {
                 scanMessage.setRetryCount(retryCount + 1);

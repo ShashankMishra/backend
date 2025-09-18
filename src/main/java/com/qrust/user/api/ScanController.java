@@ -7,9 +7,11 @@ import com.qrust.common.domain.ScanHistory;
 import com.qrust.common.queue.RedisQueueService;
 import com.qrust.common.redis.RedisService;
 import com.qrust.user.api.dto.LocationRequest;
+import com.qrust.user.api.dto.ScanMessage;
 import com.qrust.user.service.CallService;
 import com.qrust.user.service.QRCodeService;
 import com.qrust.user.service.ScanService;
+import com.qrust.user.service.UserService;
 import io.quarkus.security.Authenticated;
 import jakarta.annotation.security.PermitAll;
 import jakarta.inject.Inject;
@@ -17,9 +19,6 @@ import jakarta.validation.Valid;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 
@@ -53,6 +52,8 @@ public class ScanController {
     RedisService redisService;
 
     private final ObjectMapper objectMapper = JsonUtil.createMapper();
+    @Inject
+    UserService userService;
 
     @GET
     @Path("/{scanId}")
@@ -72,9 +73,11 @@ public class ScanController {
             maskedQrCode = callService.getMaskedNumberForQr(qrCode);
         }
 
+        String ownerName = userService.getOwnerName(qrCode);
+
         if (redisService.shouldEnqueueScan(scanId)) {
             try {
-                String message = objectMapper.writeValueAsString(new ScanMessage(qrCode, scanId, 0));
+                String message = objectMapper.writeValueAsString(new ScanMessage(qrCode, ownerName, scanId, 0));
                 redisQueueService.enqueueWithDelay(SCHEDULED_QUEUE_NAME, message);
             } catch (Exception e) {
                 log.error("Failed to enqueue whatsapp message", e);
@@ -82,15 +85,6 @@ public class ScanController {
         }
 
         return Response.ok(qrCodeService.toResponse(maskedQrCode)).build();
-    }
-
-    @Data
-    @NoArgsConstructor
-    @AllArgsConstructor
-    public static class ScanMessage {
-        private QRCode qrCode;
-        private UUID scanId;
-        private int retryCount;
     }
 
     @PUT

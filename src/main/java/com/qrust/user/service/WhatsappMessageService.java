@@ -1,5 +1,6 @@
 package com.qrust.user.service;
 
+import com.qrust.common.Utils;
 import com.qrust.common.client.whatsapp.WhatsappClient;
 import com.qrust.common.client.whatsapp.WhatsappRequest;
 import com.qrust.common.domain.*;
@@ -29,7 +30,7 @@ public class WhatsappMessageService {
     @ConfigProperty(name = "whatsapp.phone.number.id")
     String phoneNumberId;
 
-    public void sendMessageOnScan(QRCode qrCode, UUID scanId) {
+    public void sendMessageOnScan(QRCode qrCode, UUID scanId, String ownerName) {
         log.info("Sending whatsapp message for qr code scan: {}", qrCode.getId());
 
         ScanHistory scan = scanService.getScan(scanId);
@@ -37,7 +38,7 @@ public class WhatsappMessageService {
         String latitude = scan.getLocation().getLatitude().toString();
         String longitude = scan.getLocation().getLongitude().toString();
 
-        Contact ownerContact = getOwnerContact(qrCode);
+        Contact ownerContact = Utils.getOwnerContact(qrCode);
 
         if (ownerContact == null) {
             log.warn("Owner contact not found for qr code: {}", qrCode.getId());
@@ -45,9 +46,6 @@ public class WhatsappMessageService {
         }
 
         String ownerPhoneNumber = "91" + ownerContact.getPhoneNumber();
-//        String ownerName = ownerContact.getName();
-        //TODO: fix this
-        String ownerName = "Test User";
 
         WhatsappRequest.Template template = WhatsappRequest.Template.builder()
                 .name("qr_scan_alert")
@@ -84,16 +82,5 @@ public class WhatsappMessageService {
         } catch (Exception e) {
             log.error("Failed to send whatsapp message to: {}", ownerPhoneNumber, e);
         }
-    }
-
-    private Contact getOwnerContact(QRCode qrCode) {
-        QRDetails details = qrCode.getDetails();
-        return switch (qrCode.getType()) {
-            case VEHICLE -> ((VehicleDetails) details).getOwnerContact();
-            case PERSON -> ((PersonDetails) details).getEmergencyContact();
-            case CHILD -> ((ChildDetails) details).getEmergencyContact();
-            case LUGGAGE -> ((LuggageDetails) details).getOwnerContact();
-            case LOCKSCREEN -> ((LockscreenDetails) details).getOwnerContact();
-        };
     }
 }

@@ -1,6 +1,8 @@
 package com.qrust.user.service;
 
+import com.qrust.common.Utils;
 import com.qrust.common.domain.Contact;
+import com.qrust.common.domain.QRCode;
 import com.qrust.common.domain.User;
 import com.qrust.common.domain.order.PaymentOrder;
 import com.qrust.common.domain.user.UserAddress;
@@ -94,5 +96,13 @@ public class UserService {
     public UserInfo getCurrentUserInfo() {
         String userId = getCurrentUser().getUserId();
         return userInfoRepository.getByUserId(userId);
+    }
+
+    public String getOwnerName(QRCode qrCode) {
+        UserInfo userInfo = userInfoRepository.getByUserId(qrCode.getOwner().getUserId());
+        Contact ownerContact = Utils.getOwnerContact(qrCode);
+        return userInfo.getContacts().stream()
+                .filter(x -> x.getPhoneNumber().equals(ownerContact.getPhoneNumber()))
+                .findFirst().get().getName();
     }
 }
