@@ -178,5 +178,15 @@ public class RedisService {
         return 0;
     }
 
-
+    public boolean shouldEnqueueScan(UUID scanId) {
+        try {
+            if (redisAPI.get(scanId.toString()).toCompletionStage().toCompletableFuture().get() == null) {
+                redisAPI.set(List.of(scanId.toString(), "1", "EX", "86400")).toCompletionStage().toCompletableFuture().get();
+                return true;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
 }

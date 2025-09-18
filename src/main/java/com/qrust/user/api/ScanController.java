@@ -5,6 +5,7 @@ import com.qrust.common.JsonUtil;
 import com.qrust.common.domain.QRCode;
 import com.qrust.common.domain.ScanHistory;
 import com.qrust.common.queue.RedisQueueService;
+import com.qrust.common.redis.RedisService;
 import com.qrust.user.api.dto.LocationRequest;
 import com.qrust.user.service.CallService;
 import com.qrust.user.service.QRCodeService;
@@ -48,6 +49,9 @@ public class ScanController {
     @ConfigProperty(name = "masking.enabled")
     boolean maskingEnabled;
 
+    @Inject
+    RedisService redisService;
+
     private final ObjectMapper objectMapper = JsonUtil.createMapper();
 
     @GET
@@ -68,11 +72,13 @@ public class ScanController {
             maskedQrCode = callService.getMaskedNumberForQr(qrCode);
         }
 
-        try {
-            String message = objectMapper.writeValueAsString(new ScanMessage(qrCode, scanId, 0));
-            redisQueueService.enqueueWithDelay(SCHEDULED_QUEUE_NAME, message);
-        } catch (Exception e) {
-            log.error("Failed to enqueue whatsapp message", e);
+        if (redisService.shouldEnqueueScan(scanId)) {
+            try {
+                String message = objectMapper.writeValueAsString(new ScanMessage(qrCode, scanId, 0));
+                redisQueueService.enqueueWithDelay(SCHEDULED_QUEUE_NAME, message);
+            } catch (Exception e) {
+                log.error("Failed to enqueue whatsapp message", e);
+            }
         }
 
         return Response.ok(qrCodeService.toResponse(maskedQrCode)).build();
