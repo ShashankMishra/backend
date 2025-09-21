@@ -77,7 +77,7 @@ public class ScanController {
 
         String ownerName = userService.getOwnerName(qrCode);
 
-        if (redisService.shouldEnqueueScan(scanId)) {
+        if (redisService.shouldEnqueueScan(scanId) && !redisService.isWhatsappMsgGlobalLimitReached()) {
             try {
                 String message = objectMapper.writeValueAsString(new ScanMessage(qrCode, ownerName, scanId, 0));
                 redisQueueService.enqueueWithDelay(SCHEDULED_QUEUE_NAME, message);
@@ -114,7 +114,5 @@ public class ScanController {
         // Convert to QRCodeResponse
         return Response.ok(scanHistory).build();
     }
-
-
 }
 

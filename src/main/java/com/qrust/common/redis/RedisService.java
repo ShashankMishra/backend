@@ -4,12 +4,14 @@ import io.vertx.redis.client.RedisAPI;
 import io.vertx.redis.client.Response;
 import jakarta.enterprise.context.ApplicationScoped;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
 
+@Slf4j
 @RequiredArgsConstructor
 @ApplicationScoped
 public class RedisService {
@@ -186,6 +188,34 @@ public class RedisService {
             }
         } catch (Exception e) {
             e.printStackTrace();
+        }
+        return false;
+    }
+
+    public boolean isWhatsappMsgGlobalLimitReached() {
+        try {
+            // Limit to 100 WA messages per day globally
+            String key = "whatsapp-global-msg-count";
+            int windowSize = 86400;
+            int maxGlobalMsg = 100;
+
+            long currentTime = System.currentTimeMillis();
+            long windowStart = currentTime - windowSize * 1000L;
+
+            redisAPI.zremrangebyscore(key, "-inf", String.valueOf(windowStart)).toCompletionStage().toCompletableFuture().get();
+
+            long requestCount = redisAPI.zcard(key).toCompletionStage().toCompletableFuture().get().toLong();
+
+            if (requestCount >= maxGlobalMsg) {
+                log.warn("Global WhatsApp message limit reached");
+                return true;
+            }
+
+            redisAPI.zadd(java.util.List.of(key, String.valueOf(currentTime), String.valueOf(currentTime))).toCompletionStage().toCompletableFuture().get();
+            redisAPI.expire(java.util.List.of(key, String.valueOf(windowSize)));
+        } catch (Exception e) {
+            log.error("Error while checking global WhatsApp message limit", e);
+            return true;
         }
         return false;
     }
