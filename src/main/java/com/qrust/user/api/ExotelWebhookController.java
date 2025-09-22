@@ -78,7 +78,6 @@ public class ExotelWebhookController {
         destination.put("numbers", List.of(contactNumber));
         response.put("destination", destination);
 
-        response.put("outgoing_phone_number", "+918047115777");
         response.put("record", true);
         response.put("recording_channels", "dual");
         response.put("max_ringing_duration", 45);
@@ -87,12 +86,6 @@ public class ExotelWebhookController {
         Map<String, Object> musicOnHold = new HashMap<>();
         musicOnHold.put("type", "operator_tone");
         response.put("music_on_hold", musicOnHold);
-
-        Map<String, Object> startCallPlayback = new HashMap<>();
-        startCallPlayback.put("playback_to", "both");
-        startCallPlayback.put("type", "text");
-        startCallPlayback.put("value", "This text would be spoken out to the callee");
-        response.put("start_call_playback", startCallPlayback);
 
         return Response.ok(response).build();
     }
