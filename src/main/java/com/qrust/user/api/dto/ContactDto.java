@@ -19,6 +19,7 @@ public class ContactDto {
     @Size(min = 10, max = 10)
     private String phoneNumber;
 
+    private ContactPreference preference;
     private Date createdAt;
 }
 

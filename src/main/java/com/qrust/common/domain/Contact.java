@@ -11,4 +11,5 @@ public class Contact {
     private String name;
     private Country country = INDIA;
     private String phoneNumber;
+    private ContactPreference preference = new ContactPreference();
 }

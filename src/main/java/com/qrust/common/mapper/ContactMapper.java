@@ -11,6 +11,15 @@ public class ContactMapper {
         if (contactDto == null) return null;
         Contact contact = new Contact();
         contact.setPhoneNumber(contactDto.getPhoneNumber());
+        contact.setPreference(mapContactPreferences(contactDto.getPreference()));
         return contact;
+    }
+
+    private static com.qrust.common.domain.ContactPreference mapContactPreferences(com.qrust.user.api.dto.ContactPreference contactPreferenceDto){
+        if (contactPreferenceDto == null) return null;
+        com.qrust.common.domain.ContactPreference contactPreference = new com.qrust.common.domain.ContactPreference();
+        contactPreference.setContactPolicy(contactPreferenceDto.getContactPolicy());
+        contactPreference.setCustomMessage(contactPreferenceDto.getCustomMessage());
+        return contactPreference;
     }
 }
