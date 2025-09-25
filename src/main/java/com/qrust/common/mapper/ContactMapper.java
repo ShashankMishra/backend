@@ -19,7 +19,6 @@ public class ContactMapper {
         if (contactPreferenceDto == null) return null;
         com.qrust.common.domain.ContactPreference contactPreference = new com.qrust.common.domain.ContactPreference();
         contactPreference.setContactPolicy(contactPreferenceDto.getContactPolicy());
-        contactPreference.setCustomMessage(contactPreferenceDto.getCustomMessage());
         return contactPreference;
     }
 }

@@ -12,6 +12,7 @@ public class VehicleDetailsMapper implements QRDetailsMapper<VehicleDetailsDto, 
         vd.setModelDescription(dto.getModelDescription());
         vd.setOwnerContact(ContactMapper.map(dto.getOwnerContact()));
         vd.setEmergencyContact(ContactMapper.map(dto.getEmergencyContact()));
+        vd.setMedicalDetails(MedicalDetailsMapper.map(dto.getMedicalDetails()));
         return vd;
     }
 

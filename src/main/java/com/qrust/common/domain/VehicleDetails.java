@@ -9,5 +9,6 @@ public class VehicleDetails implements QRDetails {
     private String modelDescription;
     private Contact ownerContact;
     private Contact emergencyContact;
+    private MedicalDetails medicalDetails;
 }
 

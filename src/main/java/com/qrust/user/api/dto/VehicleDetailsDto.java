@@ -21,6 +21,8 @@ public class VehicleDetailsDto implements QRDetailsDto {
     @Size(min = 1, max = 20)
     private String modelDescription;
     @Valid
+    private MedicalDetailsDto medicalDetails;
+    @Valid
     @NotNull
     private ContactDto ownerContact;
     @NotNull

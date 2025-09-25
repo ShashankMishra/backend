@@ -20,8 +20,6 @@ public class ChildDetailsDto implements QRDetailsDto {
     @Size(max = 30)
     private String schoolName;
     @Valid
-    private ContactDto schoolContact;
-    @Valid
     @NotNull
     private ContactDto emergencyContact;
     @Valid
@@ -30,7 +28,6 @@ public class ChildDetailsDto implements QRDetailsDto {
     @Override
     public Set<ContactDto> getContactList() {
         Set<ContactDto> contacts = new HashSet<>();
-        contacts.add(schoolContact);
         contacts.add(emergencyContact);
         return contacts;
     }

@@ -100,7 +100,6 @@ public class QRCodeController {
         ChildDetailsDto childDetailsDto = new ChildDetailsDto();
         childDetailsDto.setFullName("Sample Child");
         childDetailsDto.setSchoolName("Some");
-        childDetailsDto.setSchoolContact(dummyContact());
         childDetailsDto.setEmergencyContact(dummyContact());
         return childDetailsDto;
     }
