@@ -48,7 +48,7 @@ public class ExotelWebhookController {
         String contactNumber = redisService.getContactNumberByExtension(extractedDigits);
 
         String qrId = redisService.getQrIdByExtension(extractedDigits);
-        if (contactAvailableAsPerPreference(qrId, contactNumber)) {
+        if (!contactAvailableAsPerPreference(qrId, contactNumber)) {
             return Response.status(Response.Status.FORBIDDEN).entity("Contact is not available now").build();
         }
 
