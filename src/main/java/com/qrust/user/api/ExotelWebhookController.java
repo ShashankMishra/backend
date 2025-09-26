@@ -1,8 +1,11 @@
 package com.qrust.user.api;
 
 import com.qrust.common.domain.CallHistory;
+import com.qrust.common.domain.Contact;
+import com.qrust.common.domain.QRCode;
 import com.qrust.common.redis.RedisService;
 import com.qrust.user.service.CallHistoryService;
+import com.qrust.user.service.QRCodeService;
 import jakarta.annotation.security.PermitAll;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.*;
@@ -12,10 +15,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 
 import java.time.Instant;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Path("/exotel-webhook")
 @Slf4j
@@ -26,6 +26,9 @@ public class ExotelWebhookController {
 
     @Inject
     CallHistoryService callHistoryService;
+
+    @Inject
+    QRCodeService qrCodeService;
 
     @ConfigProperty(name = "rate.limit.max.requests", defaultValue = "5")
     Integer rateLimitMaxRequests;
@@ -43,10 +46,30 @@ public class ExotelWebhookController {
 
         String extractedDigits = digits.replace("\"", "");
         String contactNumber = redisService.getContactNumberByExtension(extractedDigits);
+
         String qrId = redisService.getQrIdByExtension(extractedDigits);
+        if (contactAvailableAsPerPreference(qrId, contactNumber)) {
+            return Response.status(Response.Status.FORBIDDEN).entity("Contact is not available now").build();
+        }
+
+
         log.info("Found contact number: {} and qrId: {} for extension: {}", contactNumber, qrId, digits);
         redisService.storeSidToContactAndQrId(callSid, contactNumber, qrId);
         return Response.ok().build();
+    }
+
+    private boolean contactAvailableAsPerPreference(String qrId, String contactNumber) {
+        QRCode qrCode = qrCodeService.getQr(UUID.fromString(qrId)); // to ensure qrId is valid
+        Set<Contact> contacts = qrCode.getDetails().getContacts();
+
+        Contact selectedContact = contacts.stream().filter(c -> c.getPhoneNumber().equals(contactNumber)).findFirst().orElse(Contact.builder().phoneNumber(contactNumber).build());
+
+        // if current time is not within contact's preferred time, block the call
+        if (!selectedContact.isAvailableNow()) {
+            log.info("Contact number: {} is not available now, blocking the call. Preference is {} ", contactNumber, selectedContact.getPreference());
+            return false;
+        }
+        return true;
     }
 
     @GET

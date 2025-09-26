@@ -30,9 +30,7 @@ public class UserService {
     UserInfoRepository userInfoRepository;
 
     public void addContact(String id, String number) {
-        Contact contact = new Contact();
-        contact.setName(id);
-        contact.setPhoneNumber(number);
+        Contact contact = Contact.builder().name(id).phoneNumber(number).build();
 
         String userId = getCurrentUser().getUserId();
         UserInfo userInfo = userInfoRepository.getByUserId(userId);

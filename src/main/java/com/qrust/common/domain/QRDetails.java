@@ -6,6 +6,8 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.qrust.common.JsonUtil;
 import lombok.SneakyThrows;
 
+import java.util.Set;
+
 
 @JsonTypeInfo(
         use = JsonTypeInfo.Id.NAME,
@@ -39,4 +41,6 @@ public interface QRDetails {
     default String toJson() {
         return JsonUtil.createMapper().writeValueAsString(this);
     }
+
+    Set<Contact> getContacts();
 }
