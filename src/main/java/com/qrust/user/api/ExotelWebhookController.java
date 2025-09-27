@@ -46,10 +46,20 @@ public class ExotelWebhookController {
 
         String extractedDigits = digits.replace("\"", "");
         String contactNumber = redisService.getContactNumberByExtension(extractedDigits);
+        if(contactNumber == null) {
+            log.warn("No contact number found for extension: {}", extractedDigits);
+            return Response.status(Response.Status.NOT_FOUND)
+                    .entity("{\"select\":\"INVALID_EXTENSION\"}")
+                    .type(MediaType.TEXT_PLAIN)
+                    .build();
+        }
 
         String qrId = redisService.getQrIdByExtension(extractedDigits);
         if (!contactAvailableAsPerPreference(qrId, contactNumber)) {
-            return Response.status(Response.Status.FORBIDDEN).entity("Contact is not available now").build();
+            return Response.status(Response.Status.FORBIDDEN)
+                    .entity("{\"select\":\"OUT_OF_CALLING_WINDOW\"}")
+                    .type(MediaType.TEXT_PLAIN)
+                    .build();
         }
 
 
