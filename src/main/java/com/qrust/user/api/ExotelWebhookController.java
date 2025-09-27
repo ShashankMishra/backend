@@ -46,9 +46,9 @@ public class ExotelWebhookController {
 
         String extractedDigits = digits.replace("\"", "");
         String contactNumber = redisService.getContactNumberByExtension(extractedDigits);
-        if(contactNumber == null) {
+        if (contactNumber == null) {
             log.warn("No contact number found for extension: {}", extractedDigits);
-            return Response.status(Response.Status.NOT_FOUND)
+            return Response.status(Response.Status.OK)
                     .entity("{\"select\":\"INVALID_EXTENSION\"}")
                     .type(MediaType.TEXT_PLAIN)
                     .build();
@@ -56,7 +56,7 @@ public class ExotelWebhookController {
 
         String qrId = redisService.getQrIdByExtension(extractedDigits);
         if (!contactAvailableAsPerPreference(qrId, contactNumber)) {
-            return Response.status(Response.Status.FORBIDDEN)
+            return Response.status(Response.Status.OK)
                     .entity("{\"select\":\"OUT_OF_CALLING_WINDOW\"}")
                     .type(MediaType.TEXT_PLAIN)
                     .build();
@@ -65,7 +65,8 @@ public class ExotelWebhookController {
 
         log.info("Found contact number: {} and qrId: {} for extension: {}", contactNumber, qrId, digits);
         redisService.storeSidToContactAndQrId(callSid, contactNumber, qrId);
-        return Response.ok().build();
+        return Response.ok().entity("{\"select\":\"FOUND_VALID\"}")
+                .type(MediaType.TEXT_PLAIN).build();
     }
 
     private boolean contactAvailableAsPerPreference(String qrId, String contactNumber) {
