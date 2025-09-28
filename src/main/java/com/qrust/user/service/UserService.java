@@ -8,6 +8,9 @@ import com.qrust.common.domain.order.PaymentOrder;
 import com.qrust.common.domain.user.UserAddress;
 import com.qrust.common.domain.user.UserInfo;
 import com.qrust.common.repository.UserInfoRepository;
+import com.qrust.user.api.dto.ContactOtp;
+import com.qrust.user.api.dto.otp.OtpType;
+import com.qrust.user.api.dto.otp.SendOtpRequest;
 import com.qrust.user.api.dto.userinfo.UpgradeUserInfoRequest;
 import com.qrust.user.api.dto.userinfo.UserInfoResponse;
 import io.quarkus.security.identity.SecurityIdentity;
@@ -15,6 +18,7 @@ import jakarta.enterprise.context.RequestScoped;
 import jakarta.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
 
+import java.io.IOException;
 import java.util.List;
 
 @Slf4j
@@ -25,6 +29,12 @@ public class UserService {
 
     @Inject
     OrderService orderService;
+
+    @Inject
+    MessageService messageService;
+
+    @Inject
+    WhatsappMessageService whatsappMessageService;
 
     @Inject
     UserInfoRepository userInfoRepository;
@@ -102,5 +112,30 @@ public class UserService {
         return userInfo.getContacts().stream()
                 .filter(x -> x.getPhoneNumber().equals(ownerContact.getPhoneNumber()))
                 .findFirst().get().getName();
+    }
+
+    public String sendOtpForUser(SendOtpRequest sendOtpRequest) throws IOException {
+        OtpType otpType = sendOtpRequest.getOtpType();
+        String verificationId = "";
+
+        if(otpType == OtpType.TEXT_OTP) {
+           verificationId =  messageService.sendOtp(sendOtpRequest.getContactDto().getPhoneNumber());
+        }else if(otpType == OtpType.WHATSAPP_OTP) {
+           verificationId = whatsappMessageService.sendOtp(sendOtpRequest.getContactDto().getPhoneNumber());
+        }
+
+        return verificationId;
+    }
+
+    public boolean validateOtpForUser(ContactOtp contactOtp) throws IOException {
+        OtpType otpType = contactOtp.getOtpType();
+
+        if(otpType == OtpType.TEXT_OTP) {
+           return messageService.validateOtp(contactOtp.getContactDto().getPhoneNumber(), contactOtp.getOtp(), contactOtp.getVerificationId());
+        }else if(otpType == OtpType.WHATSAPP_OTP) {
+           return whatsappMessageService.validateOtp(contactOtp.getVerificationId(), contactOtp.getOtp());
+        }
+
+        return false;
     }
 }

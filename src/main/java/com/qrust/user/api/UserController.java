@@ -1,8 +1,8 @@
 package com.qrust.user.api;
 
-import com.qrust.user.api.dto.ContactDto;
 import com.qrust.user.api.dto.ContactOtp;
 import com.qrust.user.api.dto.SendOtpResponse;
+import com.qrust.user.api.dto.otp.SendOtpRequest;
 import com.qrust.user.api.dto.userinfo.UpgradeUserInfoRequest;
 import com.qrust.user.service.MessageService;
 import com.qrust.user.service.UserService;
@@ -80,18 +80,18 @@ public class UserController {
     @POST
     @Path("/contacts/otp")
     @Authenticated
-    public Response sendOtp(ContactDto contactDto) throws IOException {
-        log.info("Generating OTP for contact: {}", contactDto);
-        String verificationId = messageService.sendOtp(contactDto.getPhoneNumber());
+    public Response sendOtp(SendOtpRequest sendOtpRequest) throws IOException {
+        log.info("Generating OTP for contact: {}", sendOtpRequest.getContactDto());
+        String verificationId = userService.sendOtpForUser(sendOtpRequest);
         return Response.ok(new SendOtpResponse(verificationId)).build();
     }
 
     @POST
-    @Path("/contacts/verify")
+    @Path("/contacts/verify-otp")
     @Authenticated
     public Response verifyOtp(@Valid ContactOtp contactOtp) throws IOException {
         log.info("Verifying OTP for contact: {} & otp {}", contactOtp.getVerificationId(), contactOtp.getOtp());
-        if (messageService.validateOtp(contactOtp.getContactDto().getPhoneNumber(), contactOtp.getOtp(), contactOtp.getVerificationId())) {
+        if (userService.validateOtpForUser(contactOtp)) {
             userService.addContact(contactOtp.getContactDto().getName(), contactOtp.getContactDto().getPhoneNumber());
             return Response.ok().build();
         }

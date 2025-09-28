@@ -163,6 +163,28 @@ public class RedisService {
         return String.format("%06d", ThreadLocalRandom.current().nextInt(0, 1_000_000));
     }
 
+    public void storeOtp(String verificationId, String otp) {
+        String key = "otp:" + verificationId;
+        try {
+            redisAPI.set(List.of(key, otp, "EX", "600")).toCompletionStage().toCompletableFuture().get();
+        } catch (Exception e) {
+            e.printStackTrace(); // Handle properly
+        }
+    }
+
+    public String getOtp(String verificationId) {
+        String key = "otp:" + verificationId;
+        try {
+            Response response = redisAPI.get(key).toCompletionStage().toCompletableFuture().get();
+            if (response != null && !response.toString().equalsIgnoreCase("null")) {
+                return response.toString();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
     public long incrementAndGetCount(String callFrom, String callTo) {
         String key = String.format("rate_limit:%s:%s", callFrom, callTo);
         try {
