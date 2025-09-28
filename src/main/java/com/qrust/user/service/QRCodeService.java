@@ -25,6 +25,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 import static com.qrust.common.domain.QRStatus.ACTIVE;
+import static com.qrust.common.domain.QRStatus.UNASSIGNED;
 
 @ApplicationScoped
 public class QRCodeService {
@@ -205,6 +206,13 @@ public class QRCodeService {
         QRCode qrCode = getQr(qrCodeId);
         qrCode.setPremium(true);
         qrCodeRepository.save(qrCode);
+    }
+
+    public List<QRCode> getAllQrsForAdmins() {
+        // TODO: get all unassigned and assigned QRs as well
+        return qrCodeRepository.findAll().stream()
+                .filter(qr -> qr.getStatus() == QRStatus.ASSIGNED || qr.getStatus() == UNASSIGNED)
+                .toList();
     }
 
     private void validateQrDetails(QRCodeRequest req) {

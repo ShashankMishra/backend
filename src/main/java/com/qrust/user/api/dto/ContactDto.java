@@ -19,7 +19,8 @@ public class ContactDto {
     @Size(min = 10, max = 10)
     private String phoneNumber;
 
-    private ContactPreference preference;
+    @Builder.Default
+    private ContactPreference preference = new ContactPreference();
     private Date createdAt;
 }
 
