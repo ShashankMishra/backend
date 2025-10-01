@@ -10,6 +10,7 @@ public interface QRCodeRepository {
     void save(QRCode qrCode);
     Optional<QRCode> findById(UUID id);
     List<QRCode> findAll();
+    List<QRCode> findAllByUserId(String userId);
     void delete(UUID id);
 }
 

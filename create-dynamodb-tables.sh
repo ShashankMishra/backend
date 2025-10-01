@@ -8,8 +8,26 @@ REGION="us-east-1"
 # Create QRCode table
 aws dynamodb create-table \
   --table-name QRCodeTable \
-  --attribute-definitions AttributeName=id,AttributeType=S \
+  --attribute-definitions AttributeName=id,AttributeType=S AttributeName=userId,AttributeType=S AttributeName=emailId,AttributeType=S\
   --key-schema AttributeName=id,KeyType=HASH \
+  --global-secondary-indexes '[
+    {
+      "IndexName": "userId-index",
+      "KeySchema": [
+        {"AttributeName":"userId","KeyType":"HASH"}
+      ],
+      "Projection":{"ProjectionType":"ALL"},
+      "ProvisionedThroughput":{"ReadCapacityUnits":5,"WriteCapacityUnits":5}
+    },
+     {
+          "IndexName": "emailId-index",
+          "KeySchema": [
+            {"AttributeName":"emailId","KeyType":"HASH"}
+          ],
+          "Projection":{"ProjectionType":"ALL"},
+          "ProvisionedThroughput":{"ReadCapacityUnits":5,"WriteCapacityUnits":5}
+        }
+  ]' \
   --provisioned-throughput ReadCapacityUnits=5,WriteCapacityUnits=5 \
   --endpoint-url $ENDPOINT_URL \
   --region $REGION || true

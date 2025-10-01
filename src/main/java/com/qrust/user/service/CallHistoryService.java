@@ -29,7 +29,25 @@ public class CallHistoryService {
         QRCode existing = qrCodeService.getQr(qrId);
         if (existing == null) return new ArrayList<>();
 
+        //TODO: refactor this after migration is done
         User currentUser = userService.getCurrentUser();
+        if(existing.getUserId() != null &&  existing.getUserId().equals(currentUser.getUserId())) {
+            List<CallHistory> callHistory = callHistoryRepository.findByQrId(qrId.toString());
+
+            return callHistory.stream().map(h -> {
+                String callFrom = h.getCallFrom();
+                if (callFrom != null && callFrom.length() > 4) {
+                    callFrom = callFrom.substring(0, callFrom.length() - 4) + "****";
+                }
+                return new CallHistoryResponse(
+                        h.getQrId(),
+                        h.getTimestamp(),
+                        h.getContactNumber(),
+                        callFrom
+                );
+            }).toList();
+        }
+
         if (existing.getOwner() == null || !existing.getOwner().getUserId().equals(currentUser.getUserId())) {
             throw new UnauthorizedException("You do not have permission to view call history for this QR code.");
         }

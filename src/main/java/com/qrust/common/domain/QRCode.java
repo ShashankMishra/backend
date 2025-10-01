@@ -6,6 +6,7 @@ import lombok.NoArgsConstructor;
 import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbBean;
 import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbConvertedBy;
 import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbPartitionKey;
+import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbSecondaryPartitionKey;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -20,6 +21,8 @@ public class QRCode {
     private QRStatus status = QRStatus.ACTIVE;
     private LocalDateTime createdAt;
     private QRType type;
+    private String userId;
+    private String userEmail;
     private User owner;
     private User createdBy;
     private QRDetails details;
@@ -31,6 +34,16 @@ public class QRCode {
     @DynamoDbPartitionKey
     public UUID getId() {
         return id;
+    }
+
+    @DynamoDbSecondaryPartitionKey(indexNames = {"userId-index"})
+    public String getUserId() {
+        return userId;
+    }
+
+    @DynamoDbSecondaryPartitionKey(indexNames = {"emailId-index"})
+    public String getEmailId() {
+        return userEmail;
     }
 
     @DynamoDbConvertedBy(QRDetailsConverter.class)

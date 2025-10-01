@@ -7,8 +7,10 @@ import jakarta.enterprise.context.ApplicationScoped;
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbEnhancedClient;
+import software.amazon.awssdk.enhanced.dynamodb.DynamoDbIndex;
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbTable;
 import software.amazon.awssdk.enhanced.dynamodb.TableSchema;
+import software.amazon.awssdk.enhanced.dynamodb.model.QueryConditional;
 
 import java.util.List;
 import java.util.Optional;
@@ -18,11 +20,13 @@ import java.util.UUID;
 @ApplicationScoped
 public class QRCodeRepositoryImpl implements QRCodeRepository {
     private final DynamoDbTable<QRCode> table;
+    private final DynamoDbIndex<QRCode> userIdIndex;
 
     public QRCodeRepositoryImpl(
             DynamoDbEnhancedClient enhancedClient,
             @ConfigProperty(name = "dynamodb.table.qrcode") String tableName) {
         this.table = enhancedClient.table(tableName, TableSchema.fromBean(QRCode.class));
+        this.userIdIndex = table.index("userId-index");
     }
 
     @Override
@@ -43,6 +47,14 @@ public class QRCodeRepositoryImpl implements QRCodeRepository {
     public List<QRCode> findAll() {
         log.info("Retrieving all QRCodes");
         return table.scan().items().stream().toList();
+    }
+
+    @Override
+    public List<QRCode> findAllByUserId(String userId) {
+        log.info("Retrieving all QRCodes for user {}", userId);
+        return userIdIndex.query(QueryConditional.keyEqualTo(k -> k.partitionValue(userId))).stream()
+                .flatMap(page -> page.items().stream())
+                .toList();
     }
 
     @Override

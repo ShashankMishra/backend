@@ -57,7 +57,8 @@ public class QRCodeService {
         entity.setShortId(ShortNumericIdGenerator.generate());
         entity.setCreatedAt(LocalDateTime.now());
         User currentUser = userService.getCurrentUser();
-        entity.setOwner(currentUser);
+        entity.setUserId(currentUser.getUserId());
+        entity.setUserEmail(currentUser.getEmail());
         entity.setStatus(ACTIVE);
         entity.setCreatedBy(currentUser);
 
@@ -83,7 +84,9 @@ public class QRCodeService {
 
     public QRCode claimQR(QRCode qrCode) {
         qrCode.setStatus(ACTIVE);
-        qrCode.setOwner(userService.getCurrentUser());
+        User currentUser = userService.getCurrentUser();
+        qrCode.setUserId(currentUser.getUserId());
+        qrCode.setUserEmail(currentUser.getEmail());
         qrCodeRepository.save(qrCode);
         return qrCode;
     }
@@ -93,7 +96,15 @@ public class QRCodeService {
         // delete qr id only if it is owned by the current user
         QRCode existing = getQr(qrId);
         if (existing == null) return;
+
+        //TODO: fix below code after migration is done
+
         User currentUser = userService.getCurrentUser();
+        if(existing.getUserId() != null && existing.getUserId().equals(currentUser.getUserId())) {
+            qrCodeRepository.delete(qrId);
+            return;
+        }
+
         if (existing.getOwner() == null || !existing.getOwner().getUserId().equals(currentUser.getUserId())) {
             throw new UnauthorizedException("You do not have permission to delete this QR code.");
         }
@@ -103,11 +114,16 @@ public class QRCodeService {
 
     public List<QRCode> getAllQrs() {
         User currentUser = userService.getCurrentUser();
+        List<QRCode> qrCodes = qrCodeRepository.findAllByUserId(currentUser.getUserId());
 
-        // TODO: only get owned QRs
-        return qrCodeRepository.findAll().stream()
-                .filter(qr -> qr.getOwner() != null && qr.getOwner().getUserId().equals(currentUser.getUserId()))
-                .toList();
+        //TODO: remove below code after migration is done
+        if (qrCodes == null || qrCodes.isEmpty()) {
+            // Fallback to scanning the table for backward compatibility
+            return qrCodeRepository.findAll().stream()
+                    .filter(qr -> qr.getOwner() != null && qr.getOwner().getUserId().equals(currentUser.getUserId()))
+                    .toList();
+        }
+        return qrCodes;
     }
 
 
@@ -167,7 +183,8 @@ public class QRCodeService {
         entity.setShortId(ShortNumericIdGenerator.generate());
         entity.setCreatedAt(LocalDateTime.now());
         User currentUser = userService.getCurrentUser();
-        entity.setOwner(currentUser);
+        entity.setUserId(currentUser.getUserId());
+        entity.setUserEmail(currentUser.getEmail());
         entity.setStatus(QRStatus.UNASSIGNED);
         entity.setCreatedBy(currentUser);
         entity.setPremium(true);
@@ -180,6 +197,13 @@ public class QRCodeService {
         User currentUser = userService.getCurrentUser();
         QRCode qrCode = getQr(id);
         if (qrCode == null) return null;
+
+        //TODO: refactor below code after migration is done
+
+        if(qrCode.getUserId() != null && qrCode.getUserId().equals(currentUser.getUserId())) {
+            return qrCode;
+        }
+
         if (qrCode.getOwner() == null || !qrCode.getOwner().getUserId().equals(currentUser.getUserId())) {
             throw new UnauthorizedException("You do not have permission to update this QR code.");
         }

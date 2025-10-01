@@ -107,7 +107,11 @@ public class UserService {
     }
 
     public String getOwnerName(QRCode qrCode) {
-        UserInfo userInfo = userInfoRepository.getByUserId(qrCode.getOwner().getUserId());
+        //TODO: fix below logic after migration is done
+        String userId = getCurrentUser().getUserId();
+        if(userId == null)
+            userId = qrCode.getOwner().getUserId();
+        UserInfo userInfo = userInfoRepository.getByUserId(userId);
         Contact ownerContact = Utils.getOwnerContact(qrCode);
         return userInfo.getContacts().stream()
                 .filter(x -> x.getPhoneNumber().equals(ownerContact.getPhoneNumber()))
