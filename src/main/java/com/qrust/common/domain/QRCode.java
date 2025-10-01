@@ -20,10 +20,10 @@ public class QRCode {
     private String shortId;
     private QRStatus status = QRStatus.ACTIVE;
     private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
     private QRType type;
     private String userId;
     private String userEmail;
-    private User owner;
     private User createdBy;
     private QRDetails details;
     private boolean isPublic = true;

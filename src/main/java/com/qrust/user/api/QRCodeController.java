@@ -14,6 +14,7 @@ import com.qrust.user.service.ScanService;
 import io.quarkus.security.Authenticated;
 import io.vertx.ext.web.RoutingContext;
 import jakarta.annotation.security.PermitAll;
+import jakarta.annotation.security.RolesAllowed;
 import jakarta.inject.Inject;
 import jakarta.validation.Valid;
 import jakarta.ws.rs.*;
@@ -87,7 +88,7 @@ public class QRCodeController {
 
     @DELETE
     @Path("/{id}")
-    @Authenticated
+    @RolesAllowed("admin")
     public Response delete(@PathParam("id") UUID id) {
         qrCodeService.deleteQr(id);
         return Response.noContent().build();

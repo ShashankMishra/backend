@@ -21,7 +21,7 @@ public class CallService {
 
         var detailsJson = qrCode.getDetails().toJson();
         var details = QRDetails.fromJson(detailsJson);
-        var qrCodeCopy = new QRCode(qrCode.getId(), qrCode.getShortId(), qrCode.getStatus(), qrCode.getCreatedAt(), qrCode.getType(), qrCode.getUserId(), qrCode.getUserEmail(), qrCode.getOwner(), qrCode.getCreatedBy(), details, qrCode.isPublic(), qrCode.getAccessCode(), qrCode.isPremium());
+        var qrCodeCopy = new QRCode(qrCode.getId(), qrCode.getShortId(), qrCode.getStatus(), qrCode.getCreatedAt(), qrCode.getUpdatedAt(), qrCode.getType(), qrCode.getUserId(), qrCode.getUserEmail(), qrCode.getCreatedBy(), details, qrCode.isPublic(), qrCode.getAccessCode(), qrCode.isPremium());
 
         switch (qrCodeCopy.getType()) {
             case VEHICLE -> {

@@ -19,28 +19,28 @@ public class MigrationService {
 
     private final AtomicBoolean migrationComplete = new AtomicBoolean(false);
 
-    @Scheduled(every = "10s", identity = "qrCodeMigrationJob")
-    public void migrateQrs() {
-        if (migrationComplete.get()) {
-            return;
-        }
-
-        log.info("Starting QR code migration scan...");
-        List<QRCode> qrsToMigrate = qrCodeRepository.findAll().stream()
-                .filter(qrCode -> qrCode.getOwner() != null && qrCode.getOwner().getUserId() != null && qrCode.getUserId() == null)
-                .toList();
-
-        if (qrsToMigrate.isEmpty()) {
-            migrationComplete.set(true);
-            log.info("Finished migration");
-            return;
-        }
-
-        qrsToMigrate.forEach(qrCode -> {
-            qrCode.setUserId(qrCode.getOwner().getUserId());
-            qrCode.setUserEmail(qrCode.getOwner().getEmail());
-            qrCodeRepository.save(qrCode);
-            log.info("Migrated QR code with id: {}", qrCode.getId());
-        });
-    }
+//    @Scheduled(every = "10s", identity = "qrCodeMigrationJob")
+//    public void migrateQrs() {
+//        if (migrationComplete.get()) {
+//            return;
+//        }
+//
+//        log.info("Starting QR code migration scan...");
+//        List<QRCode> qrsToMigrate = qrCodeRepository.findAll().stream()
+//                .filter(qrCode -> qrCode.getOwner() != null && qrCode.getOwner().getUserId() != null && qrCode.getUserId() == null)
+//                .toList();
+//
+//        if (qrsToMigrate.isEmpty()) {
+//            migrationComplete.set(true);
+//            log.info("Finished migration");
+//            return;
+//        }
+//
+//        qrsToMigrate.forEach(qrCode -> {
+//            qrCode.setUserId(qrCode.getOwner().getUserId());
+//            qrCode.setUserEmail(qrCode.getOwner().getEmail());
+//            qrCodeRepository.save(qrCode);
+//            log.info("Migrated QR code with id: {}", qrCode.getId());
+//        });
+//    }
 }

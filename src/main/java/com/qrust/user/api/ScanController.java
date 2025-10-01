@@ -47,7 +47,7 @@ public class ScanController {
 
     @Inject
     @ConfigProperty(name = "masking.enabled")
-    boolean maskingEnabled;
+    boolean maskingEnabledByQrust;
 
     @Inject
     RedisService redisService;
@@ -71,11 +71,11 @@ public class ScanController {
         }
         QRCode qrCode = qrCodeService.getQr(scanHistory.getQrId());
         QRCode maskedQrCode = qrCode;
-        if (maskingEnabled) {
+        if (maskingEnabledByQrust && qrCode.isPremium()) {
             maskedQrCode = callService.getMaskedNumberForQr(qrCode);
         }
 
-        if (redisService.shouldEnqueueScan(scanId) && !redisService.isWhatsappMsgGlobalLimitReached()) {
+        if (redisService.shouldEnqueueScan(scanId) && !redisService.isWhatsappMsgGlobalLimitReached() && qrCode.isPremium()) {
             try {
                 String ownerName = userService.getOwnerName(qrCode);
                 String message = objectMapper.writeValueAsString(new ScanMessage(qrCode, ownerName, scanId, 0));

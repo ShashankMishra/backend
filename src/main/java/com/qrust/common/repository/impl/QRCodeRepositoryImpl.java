@@ -12,6 +12,7 @@ import software.amazon.awssdk.enhanced.dynamodb.DynamoDbTable;
 import software.amazon.awssdk.enhanced.dynamodb.TableSchema;
 import software.amazon.awssdk.enhanced.dynamodb.model.QueryConditional;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -33,6 +34,7 @@ public class QRCodeRepositoryImpl implements QRCodeRepository {
     @WithSpan
     public void save(QRCode qrCode) {
         log.info("Saving QRCode: {}", qrCode);
+        qrCode.setUpdatedAt(LocalDateTime.now());
         table.putItem(qrCode);
     }
 
