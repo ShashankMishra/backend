@@ -18,6 +18,6 @@ public class QRUpgrade extends OrderItem {
 
     @Override
     public int calculatePrice() {
-        return 299;
+        return 149;
     }
 }

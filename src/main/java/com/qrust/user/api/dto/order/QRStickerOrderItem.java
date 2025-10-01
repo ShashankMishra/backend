@@ -15,10 +15,14 @@ public class QRStickerOrderItem extends OrderItem {
     public QRStickerOrderItem() {
         setOrderItemType(OrderItemType.QR_STICKER);
     }
-    
+
     @Override
     public int calculatePrice() {
-        // All sticker types currently have the same price
-        return 499 * quantity;
+        switch (stickerType) {
+            case VEHICLE:
+                return 189 * quantity;
+            default:
+                return 249 * quantity;
+        }
     }
 }
