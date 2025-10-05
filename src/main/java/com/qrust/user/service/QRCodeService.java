@@ -59,6 +59,7 @@ public class QRCodeService {
         User currentUser = userService.getCurrentUser();
         entity.setUserId(currentUser.getUserId());
         entity.setUserEmail(currentUser.getEmail());
+        entity.setUserEmail(currentUser.getEmail());
         entity.setStatus(ACTIVE);
         entity.setCreatedBy(currentUser);
 
@@ -86,6 +87,7 @@ public class QRCodeService {
         qrCode.setStatus(ACTIVE);
         User currentUser = userService.getCurrentUser();
         qrCode.setUserId(currentUser.getUserId());
+        qrCode.setUserEmail(currentUser.getEmail());
         qrCode.setUserEmail(currentUser.getEmail());
         qrCodeRepository.save(qrCode);
         return qrCode;
