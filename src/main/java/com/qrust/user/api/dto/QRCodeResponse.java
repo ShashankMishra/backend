@@ -18,4 +18,5 @@ public class QRCodeResponse {
     private boolean isPublic;
     private String shortId;
     private boolean isPremium;
+    private boolean isSetupDone;
 }

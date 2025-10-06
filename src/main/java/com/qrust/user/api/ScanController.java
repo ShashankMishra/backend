@@ -71,11 +71,13 @@ public class ScanController {
         }
         QRCode qrCode = qrCodeService.getQr(scanHistory.getQrId());
         QRCode maskedQrCode = qrCode;
-        if (maskingEnabledByQrust && qrCode.isPremium()) {
+
+
+        if (maskingEnabledByQrust && qrCode.isPremium() && qrCode.isSetupDone()) {
             maskedQrCode = callService.getMaskedNumberForQr(qrCode);
         }
 
-        if (redisService.shouldEnqueueScan(scanId) && !redisService.isWhatsappMsgGlobalLimitReached() && qrCode.isPremium()) {
+        if (qrCode.isSetupDone() && qrCode.isPremium() && redisService.shouldEnqueueScan(scanId) && !redisService.isWhatsappMsgGlobalLimitReached()) {
             try {
                 String ownerName = userService.getOwnerName(qrCode);
                 String message = objectMapper.writeValueAsString(new ScanMessage(qrCode, ownerName, scanId, 0));

@@ -2,6 +2,7 @@ package com.qrust;
 
 public class Constants {
 
+    public static final String DUMMY_NUMBER = "1234567890";
     public static final String EXOTEL_VIRTUAL_NUMBER = "01141194636";
 
     public static final String QUEUE_NAME = "{whatsapp_messages}";

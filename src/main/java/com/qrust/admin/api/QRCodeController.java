@@ -17,6 +17,8 @@ import lombok.extern.slf4j.Slf4j;
 import java.util.List;
 import java.util.UUID;
 
+import static com.qrust.Constants.DUMMY_NUMBER;
+
 @Path("admin/qr-codes")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
@@ -119,7 +121,7 @@ public class QRCodeController {
     }
 
     private ContactDto dummyContact() {
-        return ContactDto.builder().phoneNumber("1234567890").build();
+        return ContactDto.builder().phoneNumber(DUMMY_NUMBER).build();
     }
 
 

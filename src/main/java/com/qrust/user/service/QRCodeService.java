@@ -82,7 +82,6 @@ public class QRCodeService {
     }
 
 
-
     public QRCode claimQR(QRCode qrCode) {
         qrCode.setStatus(ACTIVE);
         User currentUser = userService.getCurrentUser();
@@ -110,8 +109,7 @@ public class QRCodeService {
 
 
     public QRCode getQr(UUID id) {
-        QRCode entity = qrCodeRepository.findById(id).orElse(null);
-        return entity;
+        return qrCodeRepository.findById(id).orElse(null);
     }
 
 
@@ -126,6 +124,7 @@ public class QRCodeService {
         resp.setPublic(entity.isPublic());
         resp.setShortId(entity.getShortId());
         resp.setPremium(entity.isPremium());
+        resp.setSetupDone(entity.isSetupDone());
         return resp;
     }
 
@@ -222,8 +221,8 @@ public class QRCodeService {
                 .collect(Collectors.toSet());
 
         req.getContactList().forEach(contact -> {
-            if (!(contact.getPhoneNumber()==null || verifiedPhoneNumbers.contains(contact.getPhoneNumber()))) {
-                 throw new InvalidActionException("Contact with phone number " + contact.getPhoneNumber() + " is not verified.");
+            if (!(contact.getPhoneNumber() == null || verifiedPhoneNumbers.contains(contact.getPhoneNumber()))) {
+                throw new InvalidActionException("Contact with phone number " + contact.getPhoneNumber() + " is not verified.");
             }
         });
     }
