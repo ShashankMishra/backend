@@ -15,7 +15,6 @@ import jakarta.annotation.security.RolesAllowed;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import org.apache.commons.codec.digest.DigestUtils;
-import org.jetbrains.annotations.NotNull;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -124,7 +123,7 @@ public class QRCodeService {
         resp.setPublic(entity.isPublic());
         resp.setShortId(entity.getShortId());
         resp.setPremium(entity.isPremium());
-        resp.setSetupDone(entity.isSetupDone());
+        resp.setSetupDone(entity.isSetupFinished());
         return resp;
     }
 

@@ -51,7 +51,12 @@ public class QRCode {
     }
 
     @DynamoDbIgnore
-    public boolean isSetupDone() {
-        return !details.getContacts().contains(Contact.builder().phoneNumber(DUMMY_NUMBER).build());
+    public boolean isSetupFinished() {
+
+        boolean dummyContactExist = details.getContacts()
+                .stream()
+                .anyMatch(contact -> DUMMY_NUMBER.equals(contact.getPhoneNumber()));
+
+        return !dummyContactExist;
     }
 }
