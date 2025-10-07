@@ -121,6 +121,8 @@ public class ExotelWebhookController {
         musicOnHold.put("type", "operator_tone");
         response.put("music_on_hold", musicOnHold);
 
+        log.info("Connect response made : {}", response);
+
         return Response.ok(response).build();
     }
 }

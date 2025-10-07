@@ -52,7 +52,8 @@ public class UserService {
 
     public User getCurrentUser() {
         String sub = accessToken.getClaim("sub").toString();
-        String email = accessToken.getClaim("email").toString();
+        var emailData = accessToken.getClaim("email");
+        String email = emailData == null ? "" : emailData.toString();
         return new User(sub, email);
     }
 
