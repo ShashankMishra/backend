@@ -110,8 +110,7 @@ public class UserService {
     }
 
     public String getOwnerName(QRCode qrCode) {
-        String userId = getCurrentUser().getUserId();
-        UserInfo userInfo = userInfoRepository.getByUserId(userId);
+        UserInfo userInfo = userInfoRepository.getByUserId(qrCode.getUserId());
         Contact ownerContact = Utils.getOwnerContact(qrCode);
         return userInfo.getContacts().stream()
                 .filter(x -> x.getPhoneNumber().equals(ownerContact.getPhoneNumber()))
