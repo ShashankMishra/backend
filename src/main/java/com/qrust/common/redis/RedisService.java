@@ -58,7 +58,7 @@ public class RedisService {
 
     public String getOrCreateExtension(String contactNumber, UUID qrId) {
         for (int i = 0; i < MAX_RETRIES; i++) {
-            String extension = generateRandom6DigitExtension();
+            String extension = generateRandom4DigitExtension();
             String contactKey = String.format("contact:{%s}:%s", SHARED_TAG, contactNumber);
             String extensionKey = String.format("extension:{%s}:%s", SHARED_TAG, extension);
 
@@ -161,6 +161,9 @@ public class RedisService {
 
     private String generateRandom6DigitExtension() {
         return String.format("%06d", ThreadLocalRandom.current().nextInt(0, 1_000_000));
+    }
+    private String generateRandom4DigitExtension() {
+        return String.format("%04d", ThreadLocalRandom.current().nextInt(0, 10_000));
     }
 
     public void storeOtp(String verificationId, String otp) {
