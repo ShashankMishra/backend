@@ -22,34 +22,51 @@ public class RedisService {
     Integer rateLimitTtlSeconds;
 
     private static final int TTL_SECONDS = 600;
-    private static final int MAX_RETRIES = 5;
 
     private static final String SHARED_TAG = "qrust";
 
     private static final String LUA_SCRIPT = """
+            -- KEYS[1]: The contact key for which to get or create an extension.
+            -- ARGV[1]: The Time To Live (TTL) in seconds for the Redis keys.
+            -- ARGV[2]: The contact number.
+            -- ARGV[3]: The QR ID.
+            -- ARGV[4]: The shared tag for Redis keys.
+
             local contactKey = KEYS[1]
-            local extensionKey = KEYS[2]
             local ttl = tonumber(ARGV[1])
             local contactNumber = ARGV[2]
-            local extension = ARGV[3]
-            local qrId = ARGV[4]
-            
+            local qrId = ARGV[3]
+            local sharedTag = ARGV[4]
+
+            -- Check if an extension already exists for the given contact number.
             local existingExtension = redis.call("HGET", contactKey, "extension")
             if existingExtension then
+                -- If the extension exists, extend the TTL for both the contact number-to-extension mapping
+                -- and the extension-to-contact number mapping to keep them alive.
+                local existingExtensionKey = string.format("extension:{%s}:%s", sharedTag, existingExtension)
                 redis.call("EXPIRE", contactKey, ttl)
-                redis.call("EXPIRE", extensionKey, ttl)
+                redis.call("EXPIRE", existingExtensionKey, ttl)
                 return existingExtension
             end
-            
-            if redis.call("EXISTS", extensionKey) == 1 then
-                return nil
+
+            -- If the extension does not exist, try to create a new one.
+            for i=1,5 do -- Retry loop inside lua
+                -- Generate a new random 4-digit extension.
+                local extension = tostring(math.random(1000, 9999))
+                local extensionKey = string.format("extension:{%s}:%s", sharedTag, extension)
+                -- Check if the generated extension already exists.
+                if redis.call("EXISTS", extensionKey) == 0 then
+                    -- If the extension is unique, store the new extension and the reverse mapping.
+                    redis.call("HSET", contactKey, "extension", extension, "qrId", qrId)
+                    redis.call("EXPIRE", contactKey, ttl)
+                    redis.call("HSET", extensionKey, "contactNumber", contactNumber, "qrId", qrId)
+                    redis.call("EXPIRE", extensionKey, ttl)
+                    return extension
+                end
             end
-            
-            redis.call("HSET", contactKey, "extension", extension, "qrId", qrId)
-            redis.call("EXPIRE", contactKey, ttl)
-            redis.call("HSET", extensionKey, "contactNumber", contactNumber, "qrId", qrId)
-            redis.call("EXPIRE", extensionKey, ttl)
-            return extension
+
+            -- If a unique extension could not be created after 5 retries, return nil.
+            return nil
             """;
 
     public RedisAPI getRedisAPI() {
@@ -57,30 +74,25 @@ public class RedisService {
     }
 
     public String getOrCreateExtension(String contactNumber, UUID qrId) {
-        for (int i = 0; i < MAX_RETRIES; i++) {
-            String extension = generateRandom4DigitExtension();
-            String contactKey = String.format("contact:{%s}:%s", SHARED_TAG, contactNumber);
-            String extensionKey = String.format("extension:{%s}:%s", SHARED_TAG, extension);
+        String contactKey = String.format("contact:{%s}:%s", SHARED_TAG, contactNumber);
 
-            try {
-                Response response = redisAPI.eval(List.of(
-                        LUA_SCRIPT,
-                        "2",
-                        contactKey,
-                        extensionKey,
-                        String.valueOf(TTL_SECONDS),
-                        contactNumber,
-                        extension,
-                        qrId.toString()
-                )).toCompletionStage().toCompletableFuture().get();
+        try {
+            Response response = redisAPI.eval(List.of(
+                    LUA_SCRIPT,
+                    "1",
+                    contactKey,
+                    String.valueOf(TTL_SECONDS),
+                    contactNumber,
+                    qrId.toString(),
+                    SHARED_TAG
+            )).toCompletionStage().toCompletableFuture().get();
 
-                if (response != null && !response.toString().equalsIgnoreCase("null")) {
-                    return response.toString();
-                }
-
-            } catch (Exception e) {
-                e.printStackTrace(); // Handle properly in production
+            if (response != null && !response.toString().equalsIgnoreCase("null")) {
+                return response.toString();
             }
+
+        } catch (Exception e) {
+            e.printStackTrace(); // Handle properly in production
         }
 
         throw new IllegalStateException("Failed to assign unique extension after retries.");
@@ -161,9 +173,6 @@ public class RedisService {
 
     private String generateRandom6DigitExtension() {
         return String.format("%06d", ThreadLocalRandom.current().nextInt(0, 1_000_000));
-    }
-    private String generateRandom4DigitExtension() {
-        return String.format("%04d", ThreadLocalRandom.current().nextInt(0, 10_000));
     }
 
     public void storeOtp(String verificationId, String otp) {
